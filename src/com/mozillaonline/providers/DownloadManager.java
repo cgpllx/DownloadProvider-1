@@ -226,6 +226,9 @@ public class DownloadManager {
 	public static final String EXTRA_DOWNLOAD_ID = "extra_download_id";
 
 	// this array must contain all public columns
+	/**
+	 * 这里必须包含所有的字段
+	 */
 	private static final String[] COLUMNS = new String[] { COLUMN_ID, COLUMN_TITLE, COLUMN_DESCRIPTION, COLUMN_URI, COLUMN_MEDIA_TYPE, COLUMN_TOTAL_SIZE_BYTES, COLUMN_LOCAL_URI, COLUMN_STATUS, COLUMN_REASON, COLUMN_BYTES_DOWNLOADED_SO_FAR, COLUMN_LAST_MODIFIED_TIMESTAMP };
 
 	// columns to request from DownloadProvider
@@ -871,19 +874,27 @@ public class DownloadManager {
 	}
 
 	/**
-	 * This class wraps a cursor returned by DownloadProvider -- the "underlying cursor" -- and presents a different set of columns, those defined in the DownloadManager.COLUMN_* constants. Some columns correspond directly to underlying values while others are computed from underlying data.
+	 * 对CursorWrapper再次进行封装，提高效率 This class wraps a cursor returned by DownloadProvider -- the "underlying cursor" -- and presents a different set of columns, those defined in the DownloadManager.COLUMN_* constants. Some columns correspond directly to underlying values while others are computed from underlying data.
 	 */
 	private static class CursorTranslator extends CursorWrapper {
 		public CursorTranslator(Cursor cursor, Uri baseUri) {
 			super(cursor);
 		}
 
+		/**
+		 * 从COLUMNS数组中直接返回位置，不从底层查询，提高效率
+		 * 
+		 * @return columnName的index
+		 */
 		@Override
 		public int getColumnIndex(String columnName) {
 			return Arrays.asList(COLUMNS).indexOf(columnName);
 		}
 
 		@Override
+		/**
+		 * 如果没有找到就拋异常
+		 */
 		public int getColumnIndexOrThrow(String columnName) throws IllegalArgumentException {
 			int index = getColumnIndex(columnName);
 			if (index == -1) {
@@ -893,6 +904,9 @@ public class DownloadManager {
 		}
 
 		@Override
+		/**
+		 * 根据columindex获取名字
+		 */
 		public String getColumnName(int columnIndex) {
 			int numColumns = COLUMNS.length;
 			if (columnIndex < 0 || columnIndex >= numColumns) {
@@ -902,6 +916,9 @@ public class DownloadManager {
 		}
 
 		@Override
+		/**
+		 * 获取所有的ColumnNames
+		 */
 		public String[] getColumnNames() {
 			String[] returnColumns = new String[COLUMNS.length];
 			System.arraycopy(COLUMNS, 0, returnColumns, 0, COLUMNS.length);
@@ -909,20 +926,34 @@ public class DownloadManager {
 		}
 
 		@Override
+		/**
+		 * 获取 Column 的数量
+		 */
 		public int getColumnCount() {
 			return COLUMNS.length;
 		}
 
 		@Override
+		/**
+		 * 不允许存放Blob，直接拋异常
+		 */
 		public byte[] getBlob(int columnIndex) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
+		/**
+		 * 获取Doubt值（其实获取的是Long）
+		 */
 		public double getDouble(int columnIndex) {
 			return getLong(columnIndex);
 		}
 
+		/**
+		 * 判断这个column的类型是否是long类型
+		 * @param column 要判断的column
+		 * @return
+		 */
 		private boolean isLongColumn(String column) {
 			return LONG_COLUMNS.contains(column);
 		}
