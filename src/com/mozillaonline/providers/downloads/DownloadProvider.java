@@ -97,7 +97,7 @@ public final class DownloadProvider extends ContentProvider {
 			Downloads._DATA,//
 			Downloads.COLUMN_MIME_TYPE,//
 			Downloads.COLUMN_VISIBILITY, //
-			Downloads.COLUMN_DESTINATION, //
+			Downloads.COLUMN_DESTINATION, // 目标
 			Downloads.COLUMN_CONTROL,//
 			Downloads.COLUMN_STATUS,//
 			Downloads.COLUMN_LAST_MODIFICATION, //
@@ -106,7 +106,7 @@ public final class DownloadProvider extends ContentProvider {
 			Downloads.COLUMN_TOTAL_BYTES, //
 			Downloads.COLUMN_CURRENT_BYTES, //
 			Downloads.COLUMN_TITLE, //
-			Downloads.COLUMN_DESCRIPTION,//
+			Downloads.COLUMN_DESCRIPTION,// 描叙
 			Downloads.COLUMN_URI, //
 			Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI,//
 			Downloads.COLUMN_FILE_NAME_HINT,//
@@ -418,12 +418,14 @@ public final class DownloadProvider extends ContentProvider {
 
 		Integer dest = values.getAsInteger(Downloads.COLUMN_DESTINATION);
 		if (dest != null) {
-			if (getContext().checkCallingPermission(Downloads.PERMISSION_ACCESS_ADVANCED) != PackageManager.PERMISSION_GRANTED && dest != Downloads.DESTINATION_EXTERNAL && dest != Downloads.DESTINATION_FILE_URI) {
+			if (getContext().checkCallingPermission(Downloads.PERMISSION_ACCESS_ADVANCED) != PackageManager.PERMISSION_GRANTED //
+					&& dest != Downloads.DESTINATION_EXTERNAL //
+					&& dest != Downloads.DESTINATION_FILE_URI) {
 				throw new SecurityException("unauthorized destination code");
 			}
 			if (dest == Downloads.DESTINATION_FILE_URI) {
 				getContext().enforcePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Binder.getCallingPid(), Binder.getCallingUid(), "need WRITE_EXTERNAL_STORAGE permission to use DESTINATION_FILE_URI");
-				checkFileUriDestination(values);
+				checkFileUriDestination(values);// 检测要保存的地址的合法性
 			}
 			filteredValues.put(Downloads.COLUMN_DESTINATION, dest);
 		}
@@ -437,11 +439,11 @@ public final class DownloadProvider extends ContentProvider {
 		} else {
 			filteredValues.put(Downloads.COLUMN_VISIBILITY, vis);
 		}
-		copyInteger(Downloads.COLUMN_CONTROL, values, filteredValues);
-		filteredValues.put(Downloads.COLUMN_STATUS, Downloads.STATUS_PENDING);
-		filteredValues.put(Downloads.COLUMN_LAST_MODIFICATION, mSystemFacade.currentTimeMillis());
+		copyInteger(Downloads.COLUMN_CONTROL, values, filteredValues);// 暂停 停止操作
+		filteredValues.put(Downloads.COLUMN_STATUS, Downloads.STATUS_PENDING);// 状态--暂停中...
+		filteredValues.put(Downloads.COLUMN_LAST_MODIFICATION, mSystemFacade.currentTimeMillis());// 最后一次修正的时间
 
-		String pckg = values.getAsString(Downloads.COLUMN_NOTIFICATION_PACKAGE);
+		String pckg = values.getAsString(Downloads.COLUMN_NOTIFICATION_PACKAGE);// 获取通知的包名
 		String clazz = values.getAsString(Downloads.COLUMN_NOTIFICATION_CLASS);
 		if (pckg != null && (clazz != null || isPublicApi)) {
 			int uid = Binder.getCallingUid();
@@ -467,12 +469,12 @@ public final class DownloadProvider extends ContentProvider {
 		if (Binder.getCallingUid() == 0) {
 			copyInteger(Constants.UID, values, filteredValues);
 		}
-		copyStringWithDefault(Downloads.COLUMN_TITLE, values, filteredValues, "");
-		copyStringWithDefault(Downloads.COLUMN_DESCRIPTION, values, filteredValues, "");
-		filteredValues.put(Downloads.COLUMN_TOTAL_BYTES, -1);
-		filteredValues.put(Downloads.COLUMN_CURRENT_BYTES, 0);
+		copyStringWithDefault(Downloads.COLUMN_TITLE, values, filteredValues, "");// 复制标题
+		copyStringWithDefault(Downloads.COLUMN_DESCRIPTION, values, filteredValues, "");// 复制描叙
+		filteredValues.put(Downloads.COLUMN_TOTAL_BYTES, -1);// 开始时候总大小设为-1
+		filteredValues.put(Downloads.COLUMN_CURRENT_BYTES, 0);// 开始时候已完成的大小设为0
 
-		if (values.containsKey(Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI)) {
+		if (values.containsKey(Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI)) {// /********
 			copyBoolean(Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, values, filteredValues);
 		} else {
 			// by default, make external downloads visible in the UI
@@ -485,7 +487,7 @@ public final class DownloadProvider extends ContentProvider {
 			copyBoolean(Downloads.COLUMN_ALLOW_ROAMING, values, filteredValues);
 		}
 
-		if (Constants.LOGVV) {
+		if (Constants.LOGVV) {// 打印信息
 			Log.v(Constants.TAG, "initiating download with UID " + filteredValues.getAsInteger(Constants.UID));
 			if (filteredValues.containsKey(Downloads.COLUMN_OTHER_UID)) {
 				Log.v(Constants.TAG, "other UID " + filteredValues.getAsInteger(Downloads.COLUMN_OTHER_UID));
@@ -493,18 +495,18 @@ public final class DownloadProvider extends ContentProvider {
 		}
 
 		Context context = getContext();
-		context.startService(new Intent(context, DownloadService.class));
+		context.startService(new Intent(context, DownloadService.class));// 启动服务1111
 
-		long rowID = db.insert(DB_TABLE, null, filteredValues);
+		long rowID = db.insert(DB_TABLE, null, filteredValues);// 插入到数据库
 		if (rowID == -1) {
 			Log.d(Constants.TAG, "couldn't insert into downloads database");
 			return null;
 		}
 
-		insertRequestHeaders(db, rowID, values);
-		context.startService(new Intent(context, DownloadService.class));
-		notifyContentChanged(uri, match);
-		return ContentUris.withAppendedId(Downloads.CONTENT_URI, rowID);
+		insertRequestHeaders(db, rowID, values);// 插入请求头信息
+		context.startService(new Intent(context, DownloadService.class));//// 启动服务222why
+		notifyContentChanged(uri, match);//通知监听者内容改变
+		return ContentUris.withAppendedId(Downloads.CONTENT_URI, rowID);//返回带id的uri
 	}
 
 	/**
@@ -720,6 +722,7 @@ public final class DownloadProvider extends ContentProvider {
 	 * Insert request headers for a download into the DB.
 	 */
 	private void insertRequestHeaders(SQLiteDatabase db, long downloadId, ContentValues values) {
+		// http请求头插入到数据库
 		ContentValues rowValues = new ContentValues();
 		rowValues.put(Downloads.RequestHeaders.COLUMN_DOWNLOAD_ID, downloadId);
 		for (Map.Entry<String, Object> entry : values.valueSet()) {

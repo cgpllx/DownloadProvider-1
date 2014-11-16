@@ -580,7 +580,7 @@ public class DownloadManager {
 			values.put(Downloads.COLUMN_NOTIFICATION_PACKAGE, packageName);// 通知时候的包名
 
 			if (mDestinationUri != null) {
-				values.put(Downloads.COLUMN_DESTINATION, Downloads.DESTINATION_FILE_URI);
+				values.put(Downloads.COLUMN_DESTINATION, Downloads.DESTINATION_FILE_URI);//这个需要权限
 				values.put(Downloads.COLUMN_FILE_NAME_HINT, mDestinationUri.toString());
 			} else {
 				values.put(Downloads.COLUMN_DESTINATION, Downloads.DESTINATION_EXTERNAL);
