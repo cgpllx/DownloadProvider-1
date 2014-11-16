@@ -151,7 +151,7 @@ public class DownloadThread extends Thread {
 		try {
 			PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 			wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, Constants.TAG);
-			wakeLock.acquire();
+			wakeLock.acquire();//获取电源锁
 
 			if (Constants.LOGV) {
 				Log.v(Constants.TAG, "initiating download for " + mInfo.mUri);
@@ -169,7 +169,7 @@ public class DownloadThread extends Thread {
 				} catch (RetryDownload exc) {
 					// fall through
 				} finally {
-					request.abort();
+					request.abort();//终止
 					request = null;
 				}
 			}
@@ -210,7 +210,7 @@ public class DownloadThread extends Thread {
 	 */
 	private void executeDownload(State state, AndroidHttpClient client, HttpGet request) throws StopRequest, RetryDownload {
 		InnerState innerState = new InnerState();
-		byte data[] = new byte[Constants.BUFFER_SIZE];
+		byte data[] = new byte[Constants.BUFFER_SIZE];//4096
 
 		setupDestinationFile(state, innerState);
 		addRequestHeaders(innerState, request);
