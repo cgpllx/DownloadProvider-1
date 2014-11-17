@@ -49,10 +49,7 @@ public class Helpers {
 	}
 
 	/*
-	 * Parse the Content-Disposition HTTP Header. The format of the header is
-	 * defined here: http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html This
-	 * header provides a filename for content that is going to be downloaded to
-	 * the file system. We only support the attachment type.
+	 * Parse the Content-Disposition HTTP Header. The format of the header is defined here: http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html This header provides a filename for content that is going to be downloaded to the file system. We only support the attachment type.
 	 */
 	private static String parseContentDisposition(String contentDisposition) {
 		try {
@@ -68,8 +65,7 @@ public class Helpers {
 	}
 
 	/**
-	 * Exception thrown from methods called by generateSaveFile() for any fatal
-	 * error.
+	 * Exception thrown from methods called by generateSaveFile() for any fatal error.
 	 */
 	public static class GenerateSaveFileError extends Exception {
 		private static final long serialVersionUID = 4293675292408637112L;
@@ -84,8 +80,7 @@ public class Helpers {
 	}
 
 	/**
-	 * Creates a filename (where the file should be saved) from info about a
-	 * download.
+	 * 创建一个文件名（如文件应该保存）的警告信息下载。 Creates a filename (where the file should be saved) from info about a download.
 	 */
 	public static String generateSaveFile(Context context, String url, String hint, String contentDisposition, String contentLocation, String mimeType, int destination, long contentLength, boolean isPublicApi) throws GenerateSaveFileError {
 		checkCanHandleDownload(context, mimeType, destination, isPublicApi);
@@ -231,8 +226,7 @@ public class Helpers {
 	}
 
 	/**
-	 * @return the number of bytes available on the filesystem rooted at the
-	 *         given File
+	 * @return the number of bytes available on the filesystem rooted at the given File
 	 */
 	public static long getAvailableBytes(File root) {
 		StatFs stat = new StatFs(root.getPath());
@@ -390,15 +384,7 @@ public class Helpers {
 		}
 		filename = filename + Constants.FILENAME_SEQUENCE_SEPARATOR;
 		/*
-		 * This number is used to generate partially randomized filenames to
-		 * avoid collisions. It starts at 1. The next 9 iterations increment it
-		 * by 1 at a time (up to 10). The next 9 iterations increment it by 1 to
-		 * 10 (random) at a time. The next 9 iterations increment it by 1 to 100
-		 * (random) at a time. ... Up to the point where it increases by
-		 * 100000000 at a time. (the maximum value that can be reached is
-		 * 1000000000) As soon as a number is reached that generates a filename
-		 * that doesn't exist, that filename is used. If the filename coming in
-		 * is [base].[ext], the generated filenames are [base]-[sequence].[ext].
+		 * This number is used to generate partially randomized filenames to avoid collisions. It starts at 1. The next 9 iterations increment it by 1 at a time (up to 10). The next 9 iterations increment it by 1 to 10 (random) at a time. The next 9 iterations increment it by 1 to 100 (random) at a time. ... Up to the point where it increases by 100000000 at a time. (the maximum value that can be reached is 1000000000) As soon as a number is reached that generates a filename that doesn't exist, that filename is used. If the filename coming in is [base].[ext], the generated filenames are [base]-[sequence].[ext].
 		 */
 		int sequence = 1;
 		for (int magnitude = 1; magnitude < 1000000000; magnitude *= 10) {
@@ -514,8 +500,7 @@ public class Helpers {
 	}
 
 	/**
-	 * A simple lexer that recognizes the words of our restricted subset of SQL
-	 * where clauses
+	 * A simple lexer that recognizes the words of our restricted subset of SQL where clauses
 	 */
 	private static class Lexer {
 		public static final int TOKEN_START = 0;
@@ -694,8 +679,7 @@ public class Helpers {
 	}
 
 	/**
-	 * Delete the given file from device and delete its row from the downloads
-	 * database.
+	 * Delete the given file from device and delete its row from the downloads database.
 	 */
 	/* package */
 	static void deleteFile(ContentResolver resolver, long id, String path, String mimeType) {

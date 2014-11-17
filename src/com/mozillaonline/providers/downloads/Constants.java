@@ -20,8 +20,7 @@ import android.util.Config;
 import android.util.Log;
 
 /**
- * Contains the internal constants that are used in the download manager. As a
- * general rule, modifying these constants should be done with care.
+ * Contains the internal constants that are used in the download manager. As a general rule, modifying these constants should be done with care.
  */
 public class Constants {
 
@@ -56,38 +55,32 @@ public class Constants {
 	public static final String ACTION_LIST = "android.intent.action.DOWNLOAD_LIST";
 
 	/**
-	 * the intent that gets sent when deleting the notification of a completed
-	 * download
+	 * the intent that gets sent when deleting the notification of a completed download
 	 */
 	public static final String ACTION_HIDE = "android.intent.action.DOWNLOAD_HIDE";
 
 	/**
-	 * The default base name for downloaded files if we can't get one at the
-	 * HTTP level
+	 * The default base name for downloaded files if we can't get one at the HTTP level
 	 */
 	public static final String DEFAULT_DL_FILENAME = "downloadfile";
 
 	/**
-	 * The default extension for html files if we can't get one at the HTTP
-	 * level
+	 * The default extension for html files if we can't get one at the HTTP level
 	 */
 	public static final String DEFAULT_DL_HTML_EXTENSION = ".html";
 
 	/**
-	 * The default extension for text files if we can't get one at the HTTP
-	 * level
+	 * The default extension for text files if we can't get one at the HTTP level
 	 */
 	public static final String DEFAULT_DL_TEXT_EXTENSION = ".txt";
 
 	/**
-	 * The default extension for binary files if we can't get one at the HTTP
-	 * level
+	 * The default extension for binary files if we can't get one at the HTTP level
 	 */
 	public static final String DEFAULT_DL_BINARY_EXTENSION = ".bin";
 
 	/**
-	 * When a number has to be appended to the filename, this string is used to
-	 * separate the base filename from the sequence number
+	 * When a number has to be appended to the filename, this string is used to separate the base filename from the sequence number
 	 */
 	public static final String FILENAME_SEQUENCE_SEPARATOR = "-";
 
@@ -110,14 +103,12 @@ public class Constants {
 	public static final int BUFFER_SIZE = 4096;
 
 	/**
-	 * The minimum amount of progress that has to be done before the progress
-	 * bar gets updated
+	 * The minimum amount of progress that has to be done before the progress bar gets updated
 	 */
 	public static final int MIN_PROGRESS_STEP = 4096;
 
 	/**
-	 * The minimum amount of time that has to elapse before the progress bar
-	 * gets updated, in ms
+	 * The minimum amount of time that has to elapse before the progress bar gets updated, in ms
 	 */
 	public static final long MIN_PROGRESS_TIME = 1500;
 
@@ -125,32 +116,27 @@ public class Constants {
 	public static final int MAX_DOWNLOADS = 1000;// 在数据库中存在的最大行数
 
 	/**
-	 * The number of times that the download manager will retry its network
-	 * operations when no progress is happening before it gives up.
+	 * The number of times that the download manager will retry its network operations when no progress is happening before it gives up.
 	 */
 	public static final int MAX_RETRIES = 5;
 
 	/**
-	 * The minimum amount of time that the download manager accepts for a
-	 * Retry-After response header with a parameter in delta-seconds.
+	 * The minimum amount of time that the download manager accepts for a Retry-After response header with a parameter in delta-seconds.
 	 */
 	public static final int MIN_RETRY_AFTER = 30; // 30s
 
 	/**
-	 * The maximum amount of time that the download manager accepts for a
-	 * Retry-After response header with a parameter in delta-seconds.
+	 * The maximum amount of time that the download manager accepts for a Retry-After response header with a parameter in delta-seconds.
 	 */
 	public static final int MAX_RETRY_AFTER = 24 * 60 * 60; // 24h
 
 	/**
 	 * The maximum number of redirects.
 	 */
-	public static final int MAX_REDIRECTS = 5; // can't be more than 7.
+	public static final int MAX_REDIRECTS = 5; // can't be more than 7.//最大重定向次数
 
 	/**
-	 * The time between a failure and the first retry after an IOException. Each
-	 * subsequent retry grows exponentially, doubling each time. The time is in
-	 * seconds.
+	 * The time between a failure and the first retry after an IOException. Each subsequent retry grows exponentially, doubling each time. The time is in seconds.
 	 */
 	public static final int RETRY_FIRST_DELAY = 30;
 
@@ -158,8 +144,7 @@ public class Constants {
 	static final boolean LOGX = false;
 
 	/**
-	 * Enable verbose logging - use with
-	 * "setprop log.tag.DownloadManager VERBOSE"
+	 * Enable verbose logging - use with "setprop log.tag.DownloadManager VERBOSE"
 	 */
 	private static final boolean LOCAL_LOGV = false;
 	@SuppressWarnings("unused")

@@ -120,8 +120,7 @@ public class DownloadInfo {
 		}
 
 		/**
-		 * Returns a String that holds the current value of the column,
-		 * optimizing for the case where the value hasn't changed.
+		 * Returns a String that holds the current value of the column, optimizing for the case where the value hasn't changed.
 		 */
 		private String getString(String old, String column) {
 			int index = mCursor.getColumnIndexOrThrow(column);
@@ -180,27 +179,22 @@ public class DownloadInfo {
 	public static final int NETWORK_UNUSABLE_DUE_TO_SIZE = 3;
 
 	/**
-	 * The download exceeds the recommended maximum size for this network, the
-	 * user must confirm for this download to proceed without WiFi.
+	 * The download exceeds the recommended maximum size for this network, the user must confirm for this download to proceed without WiFi.
 	 */
 	public static final int NETWORK_RECOMMENDED_UNUSABLE_DUE_TO_SIZE = 4;
 
 	/**
-	 * The current connection is roaming, and the download can't proceed over a
-	 * roaming connection.
+	 * The current connection is roaming, and the download can't proceed over a roaming connection.
 	 */
 	public static final int NETWORK_CANNOT_USE_ROAMING = 5;
 
 	/**
-	 * The app requesting the download specific that it can't use the current
-	 * network connection.
+	 * The app requesting the download specific that it can't use the current network connection.
 	 */
 	public static final int NETWORK_TYPE_DISALLOWED_BY_REQUESTOR = 6;
 
 	/**
-	 * For intents used to notify the user that a download exceeds a size
-	 * threshold, if this extra is true, WiFi is required for this download
-	 * size; otherwise, it is only recommended.
+	 * For intents used to notify the user that a download exceeds a size threshold, if this extra is true, WiFi is required for this download size; otherwise, it is only recommended.
 	 */
 	public static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
 
@@ -214,7 +208,7 @@ public class DownloadInfo {
 	public int mVisibility;
 	public int mControl;
 	public int mStatus;
-	public int mNumFailed;
+	public int mNumFailed;// 重试失败次数
 	public int mRetryAfter;
 	public long mLastMod;
 	public String mPackage;
@@ -235,8 +229,8 @@ public class DownloadInfo {
 	public int mBypassRecommendedSizeLimit;
 
 	public int mFuzz;
-
-	public volatile boolean mHasActiveThread;
+	// volatile
+	public volatile boolean mHasActiveThread;// 线程是否是活的
 
 	private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
 	private SystemFacade mSystemFacade;
@@ -278,7 +272,7 @@ public class DownloadInfo {
 			// sending spoofed intents.
 			intent.setData(getMyDownloadsUri());
 		}
-		mSystemFacade.sendBroadcast(intent);
+		mSystemFacade.sendBroadcast(intent);// 发送广播
 	}
 
 	/**
@@ -295,8 +289,7 @@ public class DownloadInfo {
 	}
 
 	/**
-	 * Returns whether this download (which the download manager hasn't seen
-	 * yet) should be started.
+	 * Returns whether this download (which the download manager hasn't seen yet) should be started.
 	 */
 	private boolean isReadyToStart(long now) {
 		if (mHasActiveThread) {
@@ -329,8 +322,7 @@ public class DownloadInfo {
 	}
 
 	/**
-	 * Returns whether this download has a visible notification after
-	 * completion.
+	 * Returns whether this download has a visible notification after completion.
 	 */
 	public boolean hasCompletionNotification() {
 		if (!Downloads.isStatusCompleted(mStatus)) {
@@ -343,7 +335,7 @@ public class DownloadInfo {
 	}
 
 	/**
-	 * Returns whether this download is allowed to use the network.
+	 * 检测是否有可以使用的网络 Returns whether this download is allowed to use the network.
 	 * 
 	 * @return one of the NETWORK_* constants
 	 */
@@ -367,8 +359,7 @@ public class DownloadInfo {
 	}
 
 	/**
-	 * @return a non-localized string appropriate for logging corresponding to
-	 *         one of the NETWORK_* constants.
+	 * @return a non-localized string appropriate for logging corresponding to one of the NETWORK_* constants.
 	 */
 	public String getLogMessageForNetworkError(int networkError) {
 		switch (networkError) {
@@ -410,8 +401,7 @@ public class DownloadInfo {
 	}
 
 	/**
-	 * Translate a ConnectivityManager.TYPE_* constant to the corresponding
-	 * DownloadManager.Request.NETWORK_* bit flag.
+	 * Translate a ConnectivityManager.TYPE_* constant to the corresponding DownloadManager.Request.NETWORK_* bit flag.
 	 */
 	private int translateNetworkTypeToApiFlag(int networkType) {
 		switch (networkType) {
@@ -427,8 +417,7 @@ public class DownloadInfo {
 	}
 
 	/**
-	 * Check if the download's size prohibits it from running over the current
-	 * network.
+	 * Check if the download's size prohibits it from running over the current network.
 	 * 
 	 * @return one of the NETWORK_* constants
 	 */
@@ -514,11 +503,7 @@ public class DownloadInfo {
 	}
 
 	/**
-	 * Returns the amount of time (as measured from the "now" parameter) at
-	 * which a download will be active. 0 = immediately - service should stick
-	 * around to handle this download. -1 = never - service can go away without
-	 * ever waking up. positive value - service must wake up in the future, as
-	 * specified in ms from "now"
+	 * Returns the amount of time (as measured from the "now" parameter) at which a download will be active. 0 = immediately - service should stick around to handle this download. -1 = never - service can go away without ever waking up. positive value - service must wake up in the future, as specified in ms from "now"
 	 */
 	long nextAction(long now) {
 		if (Downloads.isStatusCompleted(mStatus)) {

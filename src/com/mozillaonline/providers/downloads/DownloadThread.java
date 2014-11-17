@@ -30,6 +30,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.http.AndroidHttpClient;
@@ -56,13 +57,12 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Returns the user agent provided by the initiating app, or use the default
-	 * one
+	 * Returns the user agent provided by the initiating app, or use the default one
 	 */
 	private String userAgent() {
 		String userAgent = mInfo.mUserAgent;
-		if (userAgent != null) {
-		}
+		// if (userAgent != null) {
+		// }
 		if (userAgent == null) {
 			userAgent = Constants.DEFAULT_USER_AGENT;
 		}
@@ -74,12 +74,12 @@ public class DownloadThread extends Thread {
 	 */
 	private static class State {
 		public String mFilename;
-		public FileOutputStream mStream;
+		public FileOutputStream mStream;// 保存到本地文件的文件流
 		public String mMimeType;
 		public boolean mCountRetry = false;
 		public int mRetryAfter = 0;
-		public int mRedirectCount = 0;
-		public String mNewUri;
+		public int mRedirectCount = 0;// 重定向次数
+		public String mNewUri;// 重定向后新的uri
 		public boolean mGotData = false;
 		public String mRequestUri;
 
@@ -105,13 +105,9 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Raised from methods called by run() to indicate that the current request
-	 * should be stopped immediately.
+	 * Raised from methods called by run() to indicate that the current request should be stopped immediately.
 	 * 
-	 * Note the message passed to this exception will be logged and therefore
-	 * must be guaranteed not to contain any PII, meaning it generally can't
-	 * include any information about the request URI, headers, or destination
-	 * filename.
+	 * Note the message passed to this exception will be logged and therefore must be guaranteed not to contain any PII, meaning it generally can't include any information about the request URI, headers, or destination filename.
 	 */
 	private class StopRequest extends Throwable {
 		private static final long serialVersionUID = 1L;
@@ -130,8 +126,7 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Raised from methods called by executeDownload() to indicate that the
-	 * download should be retried immediately.
+	 * Raised from methods called by executeDownload() to indicate that the download should be retried immediately.
 	 */
 	private class RetryDownload extends Throwable {
 		private static final long serialVersionUID = 1L;
@@ -140,6 +135,7 @@ public class DownloadThread extends Thread {
 	/**
 	 * Executes the download in a separate thread
 	 */
+	@SuppressLint("Wakelock")
 	public void run() {
 		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
@@ -151,7 +147,7 @@ public class DownloadThread extends Thread {
 		try {
 			PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 			wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, Constants.TAG);
-			wakeLock.acquire();//获取电源锁
+			wakeLock.acquire();// 获取电源锁
 
 			if (Constants.LOGV) {
 				Log.v(Constants.TAG, "initiating download for " + mInfo.mUri);
@@ -164,12 +160,12 @@ public class DownloadThread extends Thread {
 				Log.i(Constants.TAG, "Initiating request for download " + mInfo.mId);
 				HttpGet request = new HttpGet(state.mRequestUri);
 				try {
-					executeDownload(state, client, request);
+					executeDownload(state, client, request);// 执行下载
 					finished = true;
 				} catch (RetryDownload exc) {
 					// fall through
 				} finally {
-					request.abort();//终止
+					request.abort();// 终止
 					request = null;
 				}
 			}
@@ -177,8 +173,8 @@ public class DownloadThread extends Thread {
 			if (Constants.LOGV) {
 				Log.v(Constants.TAG, "download completed for " + mInfo.mUri);
 			}
-			finalizeDestinationFile(state);
-			finalStatus = Downloads.STATUS_SUCCESS;
+			finalizeDestinationFile(state);// 下载完成后有必要调用他，持久到磁盘中
+			finalStatus = Downloads.STATUS_SUCCESS;// 标记为下载完成
 		} catch (StopRequest error) {
 			// remove the cause before printing, in case it contains PII
 			Log.w(Constants.TAG, "Aborting request for download " + mInfo.mId + ": " + error.getMessage());
@@ -191,7 +187,7 @@ public class DownloadThread extends Thread {
 			// falls through to the code that reports an error
 		} finally {
 			if (wakeLock != null) {
-				wakeLock.release();
+				wakeLock.release();// 释放锁资源
 				wakeLock = null;
 			}
 			if (client != null) {
@@ -199,40 +195,41 @@ public class DownloadThread extends Thread {
 				client = null;
 			}
 			cleanupDestination(state, finalStatus);
+			// 通知下载完成
 			notifyDownloadCompleted(finalStatus, state.mCountRetry, state.mRetryAfter, state.mGotData, state.mFilename, state.mNewUri, state.mMimeType);
-			mInfo.mHasActiveThread = false;
+			mInfo.mHasActiveThread = false;// 线程完成
 		}
 	}
 
 	/**
-	 * Fully execute a single download request - setup and send the request,
-	 * handle the response, and transfer the data to the destination file.
+	 * Fully execute a single download request - setup and send the request, handle the response, and transfer the data to the destination file.
 	 */
 	private void executeDownload(State state, AndroidHttpClient client, HttpGet request) throws StopRequest, RetryDownload {
 		InnerState innerState = new InnerState();
-		byte data[] = new byte[Constants.BUFFER_SIZE];//4096
+		byte data[] = new byte[Constants.BUFFER_SIZE];// 4096
 
-		setupDestinationFile(state, innerState);
-		addRequestHeaders(innerState, request);
+		setupDestinationFile(state, innerState);// 准备目标文件接收数据。如果文件已经存在，我们将设置适当的恢复。
+		addRequestHeaders(innerState, request);// 这里面会设置下载起点request.addHeader("Range", "bytes=" + innerState.mBytesSoFar + "-")
 
+		// 只是在发送请求，避免使用一个无效的连接检查
 		// check just before sending the request to avoid using an invalid
 		// connection at all
 		checkConnectivity(state);
 
-		HttpResponse response = sendRequest(state, client, request);
-		handleExceptionalStatus(state, innerState, response);
+		HttpResponse response = sendRequest(state, client, request);// 获取响应的HttpResponse
+		handleExceptionalStatus(state, innerState, response);// 异常检测，有异常会拋异常返回
 
 		if (Constants.LOGV) {
 			Log.v(Constants.TAG, "received response for " + mInfo.mUri);
 		}
 
 		processResponseHeaders(state, innerState, response);
-		InputStream entityStream = openResponseEntity(state, response);
-		transferData(state, innerState, data, entityStream);
+		InputStream entityStream = openResponseEntity(state, response);// 读取输入流
+		transferData(state, innerState, data, entityStream);// 将尽可能多的数据到目标文件的HTTP响应。
 	}
 
 	/**
-	 * Check if current connectivity is valid for this request.
+	 * 检查当前连接是有效的这一要求。 Check if current connectivity is valid for this request.
 	 */
 	private void checkConnectivity(State state) throws StopRequest {
 		int networkUsable = mInfo.checkCanUseNetwork();
@@ -250,8 +247,7 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Transfer as much data as possible from the HTTP response to the
-	 * destination file.
+	 * Transfer as much data as possible from the HTTP response to the destination file.
 	 * 
 	 * @param data
 	 *            buffer to use to read data
@@ -259,42 +255,40 @@ public class DownloadThread extends Thread {
 	 *            stream for reading the HTTP response entity
 	 */
 	private void transferData(State state, InnerState innerState, byte[] data, InputStream entityStream) throws StopRequest {
-		for (;;) {
-			int bytesRead = readFromResponse(state, innerState, data, entityStream);
+		for (;;) {// 死循环，每次读取4096长度数据
+			int bytesRead = readFromResponse(state, innerState, data, entityStream);// 从响应中读取data大小的数据
 			if (bytesRead == -1) { // success, end of stream already reached
 				handleEndOfStream(state, innerState);
 				return;
 			}
 
-			state.mGotData = true;
-			writeDataToDestination(state, data, bytesRead);
-			innerState.mBytesSoFar += bytesRead;
-			reportProgress(state, innerState);
+			state.mGotData = true;// 数据准备好了
+			writeDataToDestination(state, data, bytesRead);// 把数据写到文件中state.mStream指向文件的写入流
+			innerState.mBytesSoFar += bytesRead;// 目前的下载位置
+			reportProgress(state, innerState);// 保存数据到数据库中
 
 			if (Constants.LOGVV) {
 				Log.v(Constants.TAG, "downloaded " + innerState.mBytesSoFar + " for " + mInfo.mUri);
 			}
 
-			checkPausedOrCanceled(state);
+			checkPausedOrCanceled(state);// 检测有没有暂停或者取消
 		}
 	}
 
 	/**
-	 * Called after a successful completion to take any necessary action on the
-	 * downloaded file.
+	 * 下载完成后有必要调用这个方法 。 Called after a successful completion to take any necessary action on the downloaded file.
 	 */
 	private void finalizeDestinationFile(State state) throws StopRequest {
 		// make sure the file is readable
-		FileUtils.setPermissions(state.mFilename, 0644, -1, -1);
-		syncDestination(state);
+		FileUtils.setPermissions(state.mFilename, 0644, -1, -1);// 都可以读，只有自己能写
+		syncDestination(state);// --*****************
 	}
 
 	/**
-	 * Called just before the thread finishes, regardless of status, to take any
-	 * necessary action on the downloaded file.
+	 * 就在线程完成称，不论地位，采取任何必要的行动上下载的文件。 Called just before the thread finishes, regardless of status, to take any necessary action on the downloaded file.
 	 */
 	private void cleanupDestination(State state, int finalStatus) {
-		closeDestination(state);
+		closeDestination(state);// 关闭流
 		if (state.mFilename != null && Downloads.isStatusError(finalStatus)) {
 			new File(state.mFilename).delete();
 			state.mFilename = null;
@@ -302,7 +296,9 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Sync the destination file to storage.
+	 * 强制所有系统缓冲区与基础设备同步
+	 * 
+	 * 同步目标文件存储。 Sync the destination file to storage.
 	 */
 	private void syncDestination(State state) {
 		FileOutputStream downloadedFileStream = null;
@@ -349,8 +345,7 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Check if the download has been paused or canceled, stopping the request
-	 * appropriately if it has been.
+	 * Check if the download has been paused or canceled, stopping the request appropriately if it has been.
 	 */
 	private void checkPausedOrCanceled(State state) throws StopRequest {
 		synchronized (mInfo) {
@@ -364,21 +359,22 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Report download progress through the database if necessary.
+	 * 报告通过数据库如果必要的下载进度。 Report download progress through the database if necessary.
 	 */
 	private void reportProgress(State state, InnerState innerState) {
 		long now = mSystemFacade.currentTimeMillis();
+		// 当前的下载位置-上次的下载位置>最小的步伐4096 ---且---- 当前的时间-上次的时间要大于最小的时间步伐
 		if (innerState.mBytesSoFar - innerState.mBytesNotified > Constants.MIN_PROGRESS_STEP && now - innerState.mTimeLastNotification > Constants.MIN_PROGRESS_TIME) {
 			ContentValues values = new ContentValues();
 			values.put(Downloads.COLUMN_CURRENT_BYTES, innerState.mBytesSoFar);
-			mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
-			innerState.mBytesNotified = innerState.mBytesSoFar;
-			innerState.mTimeLastNotification = now;
+			mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);// 把已经下载的进度保存到数据库中持久化
+			innerState.mBytesNotified = innerState.mBytesSoFar;// 赋值为最新的值
+			innerState.mTimeLastNotification = now;// 赋值为最新的值
 		}
 	}
 
 	/**
-	 * Write a data buffer to the destination file.
+	 * 把数据写到文件中state.mStream指向文件的写入流 Write a data buffer to the destination file.
 	 * 
 	 * @param data
 	 *            buffer containing the data to write
@@ -411,8 +407,7 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Called when we've reached the end of the HTTP response stream, to update
-	 * the database and check for consistency.
+	 * Called when we've reached the end of the HTTP response stream, to update the database and check for consistency.
 	 */
 	private void handleEndOfStream(State state, InnerState innerState) throws StopRequest {
 		ContentValues values = new ContentValues();
@@ -437,14 +432,13 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Read some data from the HTTP response stream, handling I/O errors.
+	 * 从data中读取数据返回 Read some data from the HTTP response stream, handling I/O errors.
 	 * 
 	 * @param data
 	 *            buffer to use to read data
 	 * @param entityStream
 	 *            stream for reading the HTTP response entity
-	 * @return the number of bytes actually read or -1 if the end of the stream
-	 *         has been reached
+	 * @return the number of bytes actually read or -1 if the end of the stream has been reached
 	 */
 	private int readFromResponse(State state, InnerState innerState, byte[] data, InputStream entityStream) throws StopRequest {
 		try {
@@ -452,7 +446,7 @@ public class DownloadThread extends Thread {
 		} catch (IOException ex) {
 			logNetworkState();
 			ContentValues values = new ContentValues();
-			values.put(Downloads.COLUMN_CURRENT_BYTES, innerState.mBytesSoFar);
+			values.put(Downloads.COLUMN_CURRENT_BYTES, innerState.mBytesSoFar);// 出错了才到这里
 			mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
 			if (cannotResume(innerState)) {
 				String message = "while reading response: " + ex.toString() + ", can't resume interrupted download with no ETag";
@@ -484,16 +478,15 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Read HTTP response headers and take appropriate action, including setting
-	 * up the destination file and updating the database.
+	 * 读取HTTP响应头和采取适当的行动，包括设定目标文件和更新数据库 Read HTTP response headers and take appropriate action, including setting up the destination file and updating the database.
 	 */
 	private void processResponseHeaders(State state, InnerState innerState, HttpResponse response) throws StopRequest {
-		if (innerState.mContinuingDownload) {
+		if (innerState.mContinuingDownload) {// 如果是从文件中恢复的
 			// ignore response headers on resume requests
 			return;
 		}
 
-		readResponseHeaders(state, innerState, response);
+		readResponseHeaders(state, innerState, response);// 从HTTP响应读头并将它们存储到本地的状态
 
 		try {
 			state.mFilename = Helpers.generateSaveFile(mContext, mInfo.mUri, mInfo.mHint, innerState.mHeaderContentDisposition, innerState.mHeaderContentLocation, state.mMimeType, mInfo.mDestination, (innerState.mHeaderContentLength != null) ? Long.parseLong(innerState.mHeaderContentLength) : 0, mInfo.mIsPublicApi);
@@ -509,14 +502,13 @@ public class DownloadThread extends Thread {
 			Log.v(Constants.TAG, "writing " + mInfo.mUri + " to " + state.mFilename);
 		}
 
-		updateDatabaseFromHeaders(state, innerState);
-		// check connectivity again now that we know the total size
+		updateDatabaseFromHeaders(state, innerState);// 更新数据库
+		// 检查连接了我们现在知道的总大小check connectivity again now that we know the total size
 		checkConnectivity(state);
 	}
 
 	/**
-	 * Update necessary database fields based on values of HTTP response headers
-	 * that have been read.
+	 * 更新基于HTTP响应头已读取的值所需的数据库域。 Update necessary database fields based on values of HTTP response headers that have been read.
 	 */
 	private void updateDatabaseFromHeaders(State state, InnerState innerState) {
 		ContentValues values = new ContentValues();
@@ -527,12 +519,12 @@ public class DownloadThread extends Thread {
 		if (state.mMimeType != null) {
 			values.put(Downloads.COLUMN_MIME_TYPE, state.mMimeType);
 		}
-		values.put(Downloads.COLUMN_TOTAL_BYTES, mInfo.mTotalBytes);
-		mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+		values.put(Downloads.COLUMN_TOTAL_BYTES, mInfo.mTotalBytes);// 更新当前文件的总大小到数据库中
+		mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);// mInfo.getAllDownloadsUri()这个是唯一的，后面带id
 	}
 
 	/**
-	 * Read headers from the HTTP response and store them into local state.
+	 * 从HTTP响应读头并将它们存储到本地的状态。Read headers from the HTTP response and store them into local state.
 	 */
 	private void readResponseHeaders(State state, InnerState innerState, HttpResponse response) throws StopRequest {
 		Header header = response.getFirstHeader("Content-Disposition");
@@ -586,16 +578,16 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Check the HTTP response status and handle anything unusual (e.g. not
-	 * 200/206).
+	 * 检查HTTP响应状态和处理任何不寻常的东西（例如不200 / 206）。 Check the HTTP response status and handle anything unusual (e.g. not 200/206).
 	 */
+	// 发送一个含有Rang头的Head请求，如果返回状态码为206，则允许多线程下载
 	private void handleExceptionalStatus(State state, InnerState innerState, HttpResponse response) throws StopRequest, RetryDownload {
 		int statusCode = response.getStatusLine().getStatusCode();
 		if (statusCode == 503 && mInfo.mNumFailed < Constants.MAX_RETRIES) {
 			handleServiceUnavailable(state, response);
 		}
 		if (statusCode == 301 || statusCode == 302 || statusCode == 303 || statusCode == 307) {
-			handleRedirect(state, response, statusCode);
+			handleRedirect(state, response, statusCode);// 重定向(如果有重定向，可能会重新请求)
 		}
 
 		int expectedStatus = innerState.mContinuingDownload ? 206 : Downloads.STATUS_SUCCESS;
@@ -605,7 +597,7 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Handle a status that we don't know how to deal with properly.
+	 * 处理现状，我们不知道如何处理好 Handle a status that we don't know how to deal with properly.
 	 */
 	private void handleOtherStatus(State state, InnerState innerState, int statusCode) throws StopRequest {
 		int finalStatus;
@@ -622,7 +614,7 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Handle a 3xx redirect status.
+	 * 检测重定向(取得重定向的地址，然后用新的地址去请求) Handle a 3xx redirect status.
 	 */
 	private void handleRedirect(State state, HttpResponse response, int statusCode) throws StopRequest, RetryDownload {
 		if (Constants.LOGVV) {
@@ -659,8 +651,7 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Handle a 503 Service Unavailable status by processing the Retry-After
-	 * header.
+	 * 然后http响应码是503，我们准备重试 Handle a 503 Service Unavailable status by processing the Retry-After header.
 	 */
 	private void handleServiceUnavailable(State state, HttpResponse response) throws StopRequest {
 		if (Constants.LOGVV) {
@@ -693,7 +684,7 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Send the request to the server, handling any I/O exceptions.
+	 * 获取响应的HttpResponse Send the request to the server, handling any I/O exceptions.
 	 */
 	private HttpResponse sendRequest(State state, AndroidHttpClient client, HttpGet request) throws StopRequest {
 		try {
@@ -706,6 +697,12 @@ public class DownloadThread extends Thread {
 		}
 	}
 
+	/**
+	 * 根据状态获取错误码
+	 * 
+	 * @param state
+	 * @return
+	 */
 	private int getFinalStatusForHttpError(State state) {
 		if (!Helpers.isNetworkAvailable(mSystemFacade)) {
 			return Downloads.STATUS_WAITING_FOR_NETWORK;
@@ -719,11 +716,10 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Prepare the destination file to receive data. If the file already exists,
-	 * we'll set up appropriately for resumption.
+	 * 准备目标文件接收数据。如果文件已经存在，我们将设置适当的恢复。 Prepare the destination file to receive data. If the file already exists, we'll set up appropriately for resumption.
 	 */
 	private void setupDestinationFile(State state, InnerState innerState) throws StopRequest {
-		if (!TextUtils.isEmpty(state.mFilename)) { // only true if we've already
+		if (!TextUtils.isEmpty(state.mFilename)) { // only true if we've already文件名不能为空
 			// run a thread for this
 			// download
 			if (!Helpers.isFilenameValid(state.mFilename)) {
@@ -766,7 +762,7 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Add custom headers for this download to the HTTP request.
+	 * 添加此下载到HTTP请求headers。 Add custom headers for this download to the HTTP request.
 	 */
 	private void addRequestHeaders(InnerState innerState, HttpGet request) {
 		for (Pair<String, String> header : mInfo.getHeaders()) {
@@ -777,18 +773,17 @@ public class DownloadThread extends Thread {
 			if (innerState.mHeaderETag != null) {
 				request.addHeader("If-Match", innerState.mHeaderETag);
 			}
-			request.addHeader("Range", "bytes=" + innerState.mBytesSoFar + "-");
+			request.addHeader("Range", "bytes=" + innerState.mBytesSoFar + "-");// 这里设置下载起点，实现断点下载
 		}
 	}
 
 	/**
-	 * Stores information about the completed download, and notifies the
-	 * initiating application.
+	 * Stores information about the completed download, and notifies the initiating application.
 	 */
 	private void notifyDownloadCompleted(int status, boolean countRetry, int retryAfter, boolean gotData, String filename, String uri, String mimeType) {
 		notifyThroughDatabase(status, countRetry, retryAfter, gotData, filename, uri, mimeType);
-		if (Downloads.isStatusCompleted(status)) {
-			mInfo.sendIntentIfRequested();
+		if (Downloads.isStatusCompleted(status)) {// 根据响应码判断是否已经完成
+			mInfo.sendIntentIfRequested();// 完成后发送广播
 		}
 	}
 
@@ -814,14 +809,11 @@ public class DownloadThread extends Thread {
 	}
 
 	/**
-	 * Clean up a mimeType string so it can be used to dispatch an intent to
-	 * view a downloaded asset.
+	 * Clean up a mimeType string so it can be used to dispatch an intent to view a downloaded asset.
 	 * 
 	 * @param mimeType
 	 *            either null or one or more mime types (semi colon separated).
-	 * @return null if mimeType was null. Otherwise a string which represents a
-	 *         single mimetype in lowercase and with surrounding whitespaces
-	 *         trimmed.
+	 * @return null if mimeType was null. Otherwise a string which represents a single mimetype in lowercase and with surrounding whitespaces trimmed.
 	 */
 	private static String sanitizeMimeType(String mimeType) {
 		try {
