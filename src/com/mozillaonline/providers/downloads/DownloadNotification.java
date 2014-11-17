@@ -62,7 +62,7 @@ class DownloadNotification {
      * the same application. This is so that only one notification line
      * item is used for all downloads of a given application.
      *
-     */
+     */  
     static class NotificationItem {
         int mId;  // This first db _id for the download for the app
         long mTotalCurrent = 0;
