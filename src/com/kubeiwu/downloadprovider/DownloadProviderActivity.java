@@ -1,4 +1,4 @@
-package com.mozillaonline.downloadprovider;
+package com.kubeiwu.downloadprovider;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -13,10 +13,10 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.mozillaonline.providers.DownloadManager;
-import com.mozillaonline.providers.DownloadManager.Request;
-import com.mozillaonline.providers.downloads.DownloadService;
-import com.mozillaonline.providers.downloads.ui.DownloadList;
+import com.kubeiwu.providers.DownloadManager;
+import com.kubeiwu.providers.DownloadManager.Request;
+import com.kubeiwu.providers.downloads.DownloadService;
+import com.kubeiwu.providers.downloads.ui.DownloadList;
 
 public class DownloadProviderActivity extends Activity implements OnClickListener {
 	@SuppressWarnings("unused")
@@ -62,9 +62,9 @@ public class DownloadProviderActivity extends Activity implements OnClickListene
 		mStartDownloadButton.setOnClickListener(this);
 		mShowDownloadListButton.setOnClickListener(this);
 
-//		mUrlInputEditText.setText("http://video.konkacloud.cn/uploads/2/avatars/temp1.jpg");
+		// mUrlInputEditText.setText("http://video.konkacloud.cn/uploads/2/avatars/temp1.jpg");
 		mUrlInputEditText.setText("http://apka.mumayi.com/2014/11/07/86/868688/koudaiyaoguai.3D_V1.5.1_mumayi_3d3d6.apk");
-//		mUrlInputEditText.setText("http://apkb.mumayi.com/2013/06/09/33/334736/quweiwuziqi_wuguanggao__V2.0_mumayi_93e80.apk");
+		// mUrlInputEditText.setText("http://apkb.mumayi.com/2013/06/09/33/334736/quweiwuziqi_wuguanggao__V2.0_mumayi_93e80.apk");
 	}
 
 	private void startDownloadService() {

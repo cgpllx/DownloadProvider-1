@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mozillaonline.providers.downloads;
+package com.kubeiwu.providers.downloads;
 
 import java.io.File;
 import java.util.HashMap;

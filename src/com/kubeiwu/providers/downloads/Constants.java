@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mozillaonline.providers.downloads;
+package com.kubeiwu.providers.downloads;
 
 import android.util.Config;
 import android.util.Log;

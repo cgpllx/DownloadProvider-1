@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mozillaonline.providers.downloads;
+package com.kubeiwu.providers.downloads;
 
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -29,7 +29,7 @@ public final class Downloads implements BaseColumns {
 	/**
 	 * DownloadProvider authority
 	 */
-	public static final String AUTHORITY = "com.mozillaonline.downloads";
+	public static final String AUTHORITY = "com.kubeiwu.downloads";
 
 	/**
 	 * @hide
@@ -42,31 +42,31 @@ public final class Downloads implements BaseColumns {
 	 * 
 	 * @hide
 	 */
-	public static final String PERMISSION_ACCESS = "com.mozillaonline.permission.ACCESS_DOWNLOAD_MANAGER";
+	public static final String PERMISSION_ACCESS = "com.kubeiwu.permission.ACCESS_DOWNLOAD_MANAGER";
 
 	/**
 	 * The permission to access the download manager's advanced functions
 	 * 
 	 * @hide
 	 */
-	public static final String PERMISSION_ACCESS_ADVANCED = "com.mozillaonline.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED";
+	public static final String PERMISSION_ACCESS_ADVANCED = "com.kubeiwu.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED";
 
 	/**
 	 * The permission to access the all the downloads in the manager.
 	 */
-	public static final String PERMISSION_ACCESS_ALL = "com.mozillaonline.permission.ACCESS_ALL_DOWNLOADS";
+	public static final String PERMISSION_ACCESS_ALL = "com.kubeiwu.permission.ACCESS_ALL_DOWNLOADS";
 
 	/**
 	 * The permission to send broadcasts on download completion
 	 * 
 	 * @hide
 	 */
-	public static final String PERMISSION_SEND_INTENTS = "com.mozillaonline.permission.SEND_DOWNLOAD_COMPLETED_INTENTS";
+	public static final String PERMISSION_SEND_INTENTS = "com.kubeiwu.permission.SEND_DOWNLOAD_COMPLETED_INTENTS";
 
 	/**
 	 * 不显示通知的权限 The permission to download files without any system notification being shown.
 	 */
-	public static final String PERMISSION_NO_NOTIFICATION = "com.mozillaonline.permission.DOWNLOAD_WITHOUT_NOTIFICATION";
+	public static final String PERMISSION_NO_NOTIFICATION = "com.kubeiwu.permission.DOWNLOAD_WITHOUT_NOTIFICATION";
 
 	/**
 	 * The content:// URI for the data table in the provider

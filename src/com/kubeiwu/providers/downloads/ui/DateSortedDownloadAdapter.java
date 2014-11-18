@@ -15,16 +15,16 @@
  */
 
 
-package com.mozillaonline.providers.downloads.ui;
-
-import com.mozillaonline.providers.DownloadManager;
-import com.mozillaonline.providers.downloads.ui.DownloadItem.DownloadSelectListener;
+package com.kubeiwu.providers.downloads.ui;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+
+import com.kubeiwu.providers.DownloadManager;
+import com.kubeiwu.providers.downloads.ui.DownloadItem.DownloadSelectListener;
 
 /**
  * Adapter for a date-sorted list of downloads.  Delegates all the real work to

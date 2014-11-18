@@ -1,4 +1,4 @@
-package com.mozillaonline.providers.downloads;
+package com.kubeiwu.providers.downloads;
 
 import android.app.Notification;
 import android.app.NotificationManager;

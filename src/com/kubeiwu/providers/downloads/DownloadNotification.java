@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.mozillaonline.providers.downloads;
+package com.kubeiwu.providers.downloads;
 
 import java.util.Collection;
 import java.util.HashMap;
 
-import android.app.DownloadManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.ContentUris;
@@ -30,7 +29,7 @@ import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.mozillaonline.downloadprovider.R;
+import com.kubeiwu.downloadprovider.R;
 
 /**
  * This class handles the updating of the Notification Manager for the cases where there is an ongoing download. Once the download is complete (be it successful or unsuccessful) it is no longer the responsibility of this component to show the download in the notification manager.

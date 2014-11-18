@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mozillaonline.providers;
+package com.kubeiwu.providers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,7 +37,7 @@ import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
 import android.util.Pair;
 
-import com.mozillaonline.providers.downloads.Downloads;
+import com.kubeiwu.providers.downloads.Downloads;
 
 /**
  * The download manager is a system service that handles long-running HTTP

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mozillaonline.providers.downloads.ui;
+package com.kubeiwu.providers.downloads.ui;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -51,9 +51,9 @@ import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.mozillaonline.downloadprovider.R;
-import com.mozillaonline.providers.DownloadManager;
-import com.mozillaonline.providers.downloads.ui.DownloadItem.DownloadSelectListener;
+import com.kubeiwu.downloadprovider.R;
+import com.kubeiwu.providers.DownloadManager;
+import com.kubeiwu.providers.downloads.ui.DownloadItem.DownloadSelectListener;
 
 /**
  * View showing a list of all downloads the Download Manager knows about.

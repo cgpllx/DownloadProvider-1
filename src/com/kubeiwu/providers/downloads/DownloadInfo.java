@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mozillaonline.providers.downloads;
+package com.kubeiwu.providers.downloads;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,7 +33,7 @@ import android.net.Uri;
 import android.util.Log;
 import android.util.Pair;
 
-import com.mozillaonline.providers.DownloadManager;
+import com.kubeiwu.providers.DownloadManager;
 
 /**
  * Stores information about an individual download.

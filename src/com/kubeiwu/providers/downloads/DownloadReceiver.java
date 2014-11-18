@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.mozillaonline.providers.downloads;
+package com.kubeiwu.providers.downloads;
 
 import java.io.File;
-
-import com.mozillaonline.providers.DownloadManager;
 
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -31,6 +29,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
+
+import com.kubeiwu.providers.DownloadManager;
 
 /**
  * Receives system broadcasts (boot, network connectivity)
