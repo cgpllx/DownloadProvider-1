@@ -465,7 +465,7 @@ public class DownloadInfo {
 		}
 		DownloadThread downloader = new DownloadThread(mContext, mSystemFacade, this);
 		mHasActiveThread = true;
-		mSystemFacade.startThread(downloader);
+		mSystemFacade.startThread(downloader,true);
 	}
 
 	public Uri getMyDownloadsUri() {

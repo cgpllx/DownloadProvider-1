@@ -1,5 +1,7 @@
 package com.kubeiwu.providers.downloads;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -10,7 +12,7 @@ import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-class RealSystemFacade implements SystemFacade {
+public class RealSystemFacade implements SystemFacade {
 	private Context mContext;
 	private NotificationManager mNotificationManager;
 	// 2 GB
@@ -18,6 +20,7 @@ class RealSystemFacade implements SystemFacade {
 	// 1 GB
 	private static final long DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE = 1024 * 1024 * 1024;
 
+	private static final ScheduledThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(3);//下载app用的线程池
 	public RealSystemFacade(Context context) {
 		mContext = context;
 		mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -108,7 +111,13 @@ class RealSystemFacade implements SystemFacade {
 	}
 
 	@Override
-	public void startThread(Thread thread) {
-		thread.start();
+	public void startThread(Thread thread, boolean joinToThreadPool) {
+		if(joinToThreadPool){
+			threadPoolExecutor.execute(thread);
+		}else{
+			thread.start();
+		}
+		
 	}
+
 }

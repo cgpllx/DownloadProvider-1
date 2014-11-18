@@ -38,42 +38,31 @@ import android.provider.BaseColumns;
 import android.util.Pair;
 
 import com.kubeiwu.providers.downloads.Downloads;
+import com.kubeiwu.providers.downloads.RealSystemFacade;
 
 /**
- * The download manager is a system service that handles long-running HTTP
- * downloads. Clients may request that a URI be downloaded to a particular
- * destination file. The download manager will conduct the download in the
- * background, taking care of HTTP interactions and retrying downloads after
- * failures or across connectivity changes and system reboots.
+ * The download manager is a system service that handles long-running HTTP downloads. Clients may request that a URI be downloaded to a particular destination file. The download manager will conduct the download in the background, taking care of HTTP interactions and retrying downloads after failures or across connectivity changes and system reboots.
  * 
- * Instances of this class should be obtained through
- * {@link android.content.Context#getSystemService(String)} by passing
- * {@link android.content.Context#DOWNLOAD_SERVICE}.
+ * Instances of this class should be obtained through {@link android.content.Context#getSystemService(String)} by passing {@link android.content.Context#DOWNLOAD_SERVICE}.
  * 
- * Apps that request downloads through this API should register a broadcast
- * receiver for {@link #ACTION_NOTIFICATION_CLICKED} to appropriately handle
- * when the user clicks on a running download in a notification or from the
- * downloads UI.
+ * Apps that request downloads through this API should register a broadcast receiver for {@link #ACTION_NOTIFICATION_CLICKED} to appropriately handle when the user clicks on a running download in a notification or from the downloads UI.
  */
 public class DownloadManager {
 	@SuppressWarnings("unused")
 	private static final String TAG = "DownloadManager";
 
 	/**
-	 * 主键 An identifier for a particular download, unique across the system.
-	 * Clients use this ID to make subsequent calls related to the download.
+	 * 主键 An identifier for a particular download, unique across the system. Clients use this ID to make subsequent calls related to the download.
 	 */
 	public final static String COLUMN_ID = BaseColumns._ID;// 主键
 
 	/**
-	 * 标题 The client-supplied title for this download. This will be displayed in
-	 * system notifications. Defaults to the empty string.
+	 * 标题 The client-supplied title for this download. This will be displayed in system notifications. Defaults to the empty string.
 	 */
 	public final static String COLUMN_TITLE = "title";// 标题
 
 	/**
-	 * 描叙 The client-supplied description of this download. This will be
-	 * displayed in system notifications. Defaults to the empty string.
+	 * 描叙 The client-supplied description of this download. This will be displayed in system notifications. Defaults to the empty string.
 	 */
 	public final static String COLUMN_DESCRIPTION = "description";// 描叙
 
@@ -83,26 +72,19 @@ public class DownloadManager {
 	public final static String COLUMN_URI = "uri";// 下载地址
 
 	/**
-	 * 下载文件类型 Internet Media Type of the downloaded file. If no value is
-	 * provided upon creation, this will initially be null and will be filled in
-	 * based on the server's response once the download has started.
+	 * 下载文件类型 Internet Media Type of the downloaded file. If no value is provided upon creation, this will initially be null and will be filled in based on the server's response once the download has started.
 	 * 
-	 * @see <a href="http://www.ietf.org/rfc/rfc1590.txt">RFC 1590, defining
-	 *      Media Types</a>
+	 * @see <a href="http://www.ietf.org/rfc/rfc1590.txt">RFC 1590, defining Media Types</a>
 	 */
 	public final static String COLUMN_MEDIA_TYPE = "media_type";// 下载文件类型
 
 	/**
-	 * 总大小 Total size of the download in bytes. This will initially be -1 and
-	 * will be filled in once the download starts.
+	 * 总大小 Total size of the download in bytes. This will initially be -1 and will be filled in once the download starts.
 	 */
 	public final static String COLUMN_TOTAL_SIZE_BYTES = "total_size";// 总大小
 
 	/**
-	 * 本地地址 Uri where downloaded file will be stored. If a destination is
-	 * supplied by client, that URI will be used here. Otherwise, the value will
-	 * initially be null and will be filled in with a generated URI once the
-	 * download has started.
+	 * 本地地址 Uri where downloaded file will be stored. If a destination is supplied by client, that URI will be used here. Otherwise, the value will initially be null and will be filled in with a generated URI once the download has started.
 	 */
 	public final static String COLUMN_LOCAL_URI = "local_uri";// 本地地址
 
@@ -112,23 +94,15 @@ public class DownloadManager {
 	public final static String COLUMN_STATUS = "status";// 状态
 
 	/**
-	 * 原因 Provides more detail on the status of the download. Its meaning
-	 * depends on the value of {@link #COLUMN_STATUS}.
+	 * 原因 Provides more detail on the status of the download. Its meaning depends on the value of {@link #COLUMN_STATUS}.
 	 * 
-	 * When {@link #COLUMN_STATUS} is {@link #STATUS_FAILED}, this indicates the
-	 * type of error that occurred. If an HTTP error occurred, this will hold
-	 * the HTTP status code as defined in RFC 2616. Otherwise, it will hold one
-	 * of the ERROR_* constants.
+	 * When {@link #COLUMN_STATUS} is {@link #STATUS_FAILED}, this indicates the type of error that occurred. If an HTTP error occurred, this will hold the HTTP status code as defined in RFC 2616. Otherwise, it will hold one of the ERROR_* constants.
 	 * 
-	 * When {@link #COLUMN_STATUS} is {@link #STATUS_PAUSED}, this indicates why
-	 * the download is paused. It will hold one of the PAUSED_* constants.
+	 * When {@link #COLUMN_STATUS} is {@link #STATUS_PAUSED}, this indicates why the download is paused. It will hold one of the PAUSED_* constants.
 	 * 
-	 * If {@link #COLUMN_STATUS} is neither {@link #STATUS_FAILED} nor
-	 * {@link #STATUS_PAUSED}, this column's value is undefined.
+	 * If {@link #COLUMN_STATUS} is neither {@link #STATUS_FAILED} nor {@link #STATUS_PAUSED}, this column's value is undefined.
 	 * 
-	 * @see <a
-	 *      href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html#sec6.1.1">RFC
-	 *      2616 status codes</a>
+	 * @see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html#sec6.1.1">RFC 2616 status codes</a>
 	 */
 	public final static String COLUMN_REASON = "reason";// 原因
 
@@ -138,148 +112,116 @@ public class DownloadManager {
 	public final static String COLUMN_BYTES_DOWNLOADED_SO_FAR = "bytes_so_far";// 到目前为止下载了多少
 
 	/**
-	 * Timestamp when the download was last modified, in
-	 * {@link System#currentTimeMillis System.currentTimeMillis()} (wall clock
-	 * time in UTC).
+	 * Timestamp when the download was last modified, in {@link System#currentTimeMillis System.currentTimeMillis()} (wall clock time in UTC).
 	 */
 	public final static String COLUMN_LAST_MODIFIED_TIMESTAMP = "last_modified_timestamp";
 
 	/**
-	 * 等待中.. Value of {@link #COLUMN_STATUS} when the download is waiting to
-	 * start.
+	 * 等待中.. Value of {@link #COLUMN_STATUS} when the download is waiting to start.
 	 */
 	public final static int STATUS_PENDING = 1 << 0;// 等待中..
 
 	/**
-	 * 正在下载 Value of {@link #COLUMN_STATUS} when the download is currently
-	 * running.
+	 * 正在下载 Value of {@link #COLUMN_STATUS} when the download is currently running.
 	 */
 	public final static int STATUS_RUNNING = 1 << 1;// 正在下载
 
 	/**
-	 * 暂停的 Value of {@link #COLUMN_STATUS} when the download is waiting to retry
-	 * or resume.
+	 * 暂停的 Value of {@link #COLUMN_STATUS} when the download is waiting to retry or resume.
 	 */
 	public final static int STATUS_PAUSED = 1 << 2;// 暂停的
 
 	/**
-	 * 下载完成的 Value of {@link #COLUMN_STATUS} when the download has successfully
-	 * completed.
+	 * 下载完成的 Value of {@link #COLUMN_STATUS} when the download has successfully completed.
 	 */
 	public final static int STATUS_SUCCESSFUL = 1 << 3;// 下载完成的
 	/**
-	 * 下载失败 Value of {@link #COLUMN_STATUS} when the download has failed (and
-	 * will not be retried).
+	 * 下载失败 Value of {@link #COLUMN_STATUS} when the download has failed (and will not be retried).
 	 */
 	public final static int STATUS_FAILED = 1 << 4;// 下载失败
 
 	/**
-	 * 未知错误 Value of COLUMN_ERROR_CODE when the download has completed with an
-	 * error that doesn't fit under any other error code.
+	 * 未知错误 Value of COLUMN_ERROR_CODE when the download has completed with an error that doesn't fit under any other error code.
 	 */
 	public final static int ERROR_UNKNOWN = 1000;// 未知错误
 
 	/**
-	 * 文件错误 Value of {@link #COLUMN_REASON} when a storage issue arises which
-	 * doesn't fit under any other error code. Use the more specific
-	 * {@link #ERROR_INSUFFICIENT_SPACE} and {@link #ERROR_DEVICE_NOT_FOUND}
-	 * when appropriate.
+	 * 文件错误 Value of {@link #COLUMN_REASON} when a storage issue arises which doesn't fit under any other error code. Use the more specific {@link #ERROR_INSUFFICIENT_SPACE} and {@link #ERROR_DEVICE_NOT_FOUND} when appropriate.
 	 */
 	public final static int ERROR_FILE_ERROR = 1001;// 文件错误
 
 	/**
-	 * http code错误 Value of {@link #COLUMN_REASON} when an HTTP code was
-	 * received that download manager can't handle.
+	 * http code错误 Value of {@link #COLUMN_REASON} when an HTTP code was received that download manager can't handle.
 	 */
 	public final static int ERROR_UNHANDLED_HTTP_CODE = 1002;// http code错误
 
 	/**
-	 * 此下载不会因为一个错误接收或处理数据在HTTP级别完成。 Value of {@link #COLUMN_REASON} when an
-	 * error receiving or processing data occurred at the HTTP level.
+	 * 此下载不会因为一个错误接收或处理数据在HTTP级别完成。 Value of {@link #COLUMN_REASON} when an error receiving or processing data occurred at the HTTP level.
 	 */
 	public final static int ERROR_HTTP_DATA_ERROR = 1004;// 此下载不会因为一个错误接收或处理数据在HTTP级别完成。
 
 	/**
-	 * 此下载不能因为有太多的重定向完成。 Value of {@link #COLUMN_REASON} when there were too
-	 * many redirects.
+	 * 此下载不能因为有太多的重定向完成。 Value of {@link #COLUMN_REASON} when there were too many redirects.
 	 */
 	public final static int ERROR_TOO_MANY_REDIRECTS = 1005;// 此下载不能因为有太多的重定向完成。
 
 	/**
-	 * 此下载不能由于存储空间不足，完成。通常，这是因为SD卡已满。 Value of {@link #COLUMN_REASON} when there
-	 * was insufficient storage space. Typically, this is because the SD card is
-	 * full.
+	 * 此下载不能由于存储空间不足，完成。通常，这是因为SD卡已满。 Value of {@link #COLUMN_REASON} when there was insufficient storage space. Typically, this is because the SD card is full.
 	 */
 	public final static int ERROR_INSUFFICIENT_SPACE = 1006;// 此下载不能由于存储空间不足，完成。通常，这是因为SD卡已满。
 
 	/**
-	 * Value of {@link #COLUMN_REASON} when no external storage device was
-	 * found. Typically, this is because the SD card is not mounted.
+	 * Value of {@link #COLUMN_REASON} when no external storage device was found. Typically, this is because the SD card is not mounted.
 	 */
 	public final static int ERROR_DEVICE_NOT_FOUND = 1007;
 
 	/**
-	 * Value of {@link #COLUMN_REASON} when some possibly transient error
-	 * occurred but we can't resume the download.
+	 * Value of {@link #COLUMN_REASON} when some possibly transient error occurred but we can't resume the download.
 	 */
 	public final static int ERROR_CANNOT_RESUME = 1008;
 
 	/**
-	 * Value of {@link #COLUMN_REASON} when the requested destination file
-	 * already exists (the download manager will not overwrite an existing
-	 * file).
+	 * Value of {@link #COLUMN_REASON} when the requested destination file already exists (the download manager will not overwrite an existing file).
 	 */
 	public final static int ERROR_FILE_ALREADY_EXISTS = 1009;
 
 	/**
-	 * 等待重试 Value of {@link #COLUMN_REASON} when the download is paused because
-	 * some network error occurred and the download manager is waiting before
-	 * retrying the request.
+	 * 等待重试 Value of {@link #COLUMN_REASON} when the download is paused because some network error occurred and the download manager is waiting before retrying the request.
 	 */
 	public final static int PAUSED_WAITING_TO_RETRY = 1;// 等待重试
 
 	/**
-	 * 网络问题等待 Value of {@link #COLUMN_REASON} when the download is waiting for
-	 * network connectivity to proceed.
+	 * 网络问题等待 Value of {@link #COLUMN_REASON} when the download is waiting for network connectivity to proceed.
 	 */
 	public final static int PAUSED_WAITING_FOR_NETWORK = 2;// 网络问题等待
 
 	/**
-	 * Value of {@link #COLUMN_REASON} when the download exceeds a size limit
-	 * for downloads over the mobile network and the download manager is waiting
-	 * for a Wi-Fi connection to proceed.
+	 * Value of {@link #COLUMN_REASON} when the download exceeds a size limit for downloads over the mobile network and the download manager is waiting for a Wi-Fi connection to proceed.
 	 */
 	public final static int PAUSED_QUEUED_FOR_WIFI = 3;
 
 	/**
-	 * Value of {@link #COLUMN_REASON} when the download is paused for some
-	 * other reason.
+	 * Value of {@link #COLUMN_REASON} when the download is paused for some other reason.
 	 */
 	public final static int PAUSED_UNKNOWN = 4;
 
 	/**
-	 * 下载完成后发送的广播的action Broadcast intent action sent by the download manager
-	 * when a download completes.
+	 * 下载完成后发送的广播的action Broadcast intent action sent by the download manager when a download completes.
 	 */
 	public final static String ACTION_DOWNLOAD_COMPLETE = "android.intent.action.DOWNLOAD_COMPLETE";
 
 	/**
-	 * 通知被点击后发送的广播的action Broadcast intent action sent by the download manager
-	 * when the user clicks on a running download, either from a system
-	 * notification or from the downloads UI.
+	 * 通知被点击后发送的广播的action Broadcast intent action sent by the download manager when the user clicks on a running download, either from a system notification or from the downloads UI.
 	 */
 	public final static String ACTION_NOTIFICATION_CLICKED = "android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED";
 
 	/**
-	 * 显示所有的下载的action Intent action to launch an activity to display all
-	 * downloads.
+	 * 显示所有的下载的action Intent action to launch an activity to display all downloads.
 	 */
 	public final static String ACTION_VIEW_DOWNLOADS = "android.intent.action.VIEW_DOWNLOADS";
 
 	/**
-	 * 下载任务id的别名 Intent extra included with {@link #ACTION_DOWNLOAD_COMPLETE}
-	 * intents, indicating the ID (as a long) of the download that just
-	 * completed.
+	 * 下载任务id的别名 Intent extra included with {@link #ACTION_DOWNLOAD_COMPLETE} intents, indicating the ID (as a long) of the download that just completed.
 	 */
 	public static final String EXTRA_DOWNLOAD_ID = "extra_download_id";
 
@@ -328,24 +270,18 @@ public class DownloadManager {
 			));
 
 	/**
-	 * This class contains all the information necessary to request a new
-	 * download. The URI is the only required parameter.
+	 * This class contains all the information necessary to request a new download. The URI is the only required parameter.
 	 * 
-	 * Note that the default download destination is a shared volume where the
-	 * system might delete your file if it needs to reclaim space for system
-	 * use. If this is a problem, use a location on external storage (see
-	 * {@link #setDestinationUri(Uri)}.
+	 * Note that the default download destination is a shared volume where the system might delete your file if it needs to reclaim space for system use. If this is a problem, use a location on external storage (see {@link #setDestinationUri(Uri)}.
 	 */
 	public static class Request {
 		/**
-		 * Bit flag for {@link #setAllowedNetworkTypes} corresponding to
-		 * {@link ConnectivityManager#TYPE_MOBILE}.
+		 * Bit flag for {@link #setAllowedNetworkTypes} corresponding to {@link ConnectivityManager#TYPE_MOBILE}.
 		 */
 		public static final int NETWORK_MOBILE = 1 << 0;
 
 		/**
-		 * Bit flag for {@link #setAllowedNetworkTypes} corresponding to
-		 * {@link ConnectivityManager#TYPE_WIFI}.
+		 * Bit flag for {@link #setAllowedNetworkTypes} corresponding to {@link ConnectivityManager#TYPE_WIFI}.
 		 */
 		public static final int NETWORK_WIFI = 1 << 1;
 
@@ -380,12 +316,9 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 设置要保存到的Uri Set the local destination for the downloaded file. Must be
-		 * a file URI to a path on external storage, and the calling application
-		 * must have the WRITE_EXTERNAL_STORAGE permission.
+		 * 设置要保存到的Uri Set the local destination for the downloaded file. Must be a file URI to a path on external storage, and the calling application must have the WRITE_EXTERNAL_STORAGE permission.
 		 * 
-		 * If the URI is a directory(ending with "/"), destination filename will
-		 * be generated.
+		 * If the URI is a directory(ending with "/"), destination filename will be generated.
 		 * 
 		 * @return this object
 		 */
@@ -395,20 +328,14 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 设置保存到sd的位置 Set the local destination for the downloaded file to a
-		 * path within the application's external files directory (as returned
-		 * by {@link Context#getExternalFilesDir(String)}.
+		 * 设置保存到sd的位置 Set the local destination for the downloaded file to a path within the application's external files directory (as returned by {@link Context#getExternalFilesDir(String)}.
 		 * 
 		 * @param context
-		 *            the {@link Context} to use in determining the external
-		 *            files directory
+		 *            the {@link Context} to use in determining the external files directory
 		 * @param dirType
-		 *            the directory type to pass to
-		 *            {@link Context#getExternalFilesDir(String)}
+		 *            the directory type to pass to {@link Context#getExternalFilesDir(String)}
 		 * @param subPath
-		 *            the path within the external directory. If subPath is a
-		 *            directory(ending with "/"), destination filename will be
-		 *            generated.
+		 *            the path within the external directory. If subPath is a directory(ending with "/"), destination filename will be generated.
 		 * @return this object
 		 */
 		public Request setDestinationInExternalFilesDir(Context context, String dirType, String subPath) {
@@ -418,17 +345,12 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 设置保存到sd的位置 Set the local destination for the downloaded file to a
-		 * path within the public external storage directory (as returned by
-		 * {@link Environment#getExternalStoragePublicDirectory(String)}.
+		 * 设置保存到sd的位置 Set the local destination for the downloaded file to a path within the public external storage directory (as returned by {@link Environment#getExternalStoragePublicDirectory(String)}.
 		 * 
 		 * @param dirType
-		 *            the directory type to pass to
-		 *            {@link Environment#getExternalStoragePublicDirectory(String)}
+		 *            the directory type to pass to {@link Environment#getExternalStoragePublicDirectory(String)}
 		 * @param subPath
-		 *            the path within the external directory. If subPath is a
-		 *            directory(ending with "/"), destination filename will be
-		 *            generated.
+		 *            the path within the external directory. If subPath is a directory(ending with "/"), destination filename will be generated.
 		 * @return this object
 		 */
 		public Request setDestinationInExternalPublicDir(String dirType, String subPath) {
@@ -445,17 +367,14 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 增加请求头到mRequestHeaders Add an HTTP header to be included with the
-		 * download request. The header will be added to the end of the list.
+		 * 增加请求头到mRequestHeaders Add an HTTP header to be included with the download request. The header will be added to the end of the list.
 		 * 
 		 * @param header
 		 *            HTTP header name
 		 * @param value
 		 *            header value
 		 * @return this object
-		 * @see <a
-		 *      href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2">HTTP/1.1
-		 *      Message Headers</a>
+		 * @see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2">HTTP/1.1 Message Headers</a>
 		 */
 		public Request addRequestHeader(String header, String value) {//
 			if (header == null) {
@@ -472,9 +391,7 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 设置标题 Set the title of this download, to be displayed in notifications
-		 * (if enabled). If no title is given, a default one will be assigned
-		 * based on the download filename, once the download starts.
+		 * 设置标题 Set the title of this download, to be displayed in notifications (if enabled). If no title is given, a default one will be assigned based on the download filename, once the download starts.
 		 * 
 		 * @return this object
 		 */
@@ -484,8 +401,7 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 设置描叙信息 Set a description of this download, to be displayed in
-		 * notifications (if enabled)
+		 * 设置描叙信息 Set a description of this download, to be displayed in notifications (if enabled)
 		 * 
 		 * @return this object
 		 */
@@ -495,12 +411,9 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 设置MIME Set the MIME content type of this download. This will override
-		 * the content type declared in the server's response.
+		 * 设置MIME Set the MIME content type of this download. This will override the content type declared in the server's response.
 		 * 
-		 * @see <a
-		 *      href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.7">HTTP/1.1
-		 *      Media Types</a>
+		 * @see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.7">HTTP/1.1 Media Types</a>
 		 * @return this object
 		 */
 		public Request setMimeType(String mimeType) {
@@ -509,18 +422,12 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 设置是否显示通知 Control whether a system notification is posted by the
-		 * download manager while this download is running. If enabled, the
-		 * download manager posts notifications about downloads through the
-		 * system {@link com.mozillaonline.providers.NotificationManager}. By
-		 * default, a notification is shown.
+		 * 设置是否显示通知 Control whether a system notification is posted by the download manager while this download is running. If enabled, the download manager posts notifications about downloads through the system {@link com.mozillaonline.providers.NotificationManager}. By default, a notification is shown.
 		 * 
-		 * If set to false, this requires the permission
-		 * android.permission.DOWNLOAD_WITHOUT_NOTIFICATION.
+		 * If set to false, this requires the permission android.permission.DOWNLOAD_WITHOUT_NOTIFICATION.
 		 * 
 		 * @param show
-		 *            whether the download manager should show a notification
-		 *            for this download.
+		 *            whether the download manager should show a notification for this download.
 		 * @return this object
 		 */
 		public Request setShowRunningNotification(boolean show) {
@@ -529,8 +436,7 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 设置允许下载的网络类型 Restrict the types of networks over which this download
-		 * may proceed. By default, all network types are allowed.
+		 * 设置允许下载的网络类型 Restrict the types of networks over which this download may proceed. By default, all network types are allowed.
 		 * 
 		 * @param flags
 		 *            any combination of the NETWORK_* bit flags.
@@ -542,8 +448,7 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 设置是否运行漫游 Set whether this download may proceed over a roaming
-		 * connection. By default, roaming is allowed.
+		 * 设置是否运行漫游 Set whether this download may proceed over a roaming connection. By default, roaming is allowed.
 		 * 
 		 * @param allowed
 		 *            whether to allow a roaming connection to be used
@@ -555,8 +460,7 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 设置是否可以显示url Set whether this download should be displayed in the
-		 * system's Downloads UI. True by default.
+		 * 设置是否可以显示url Set whether this download should be displayed in the system's Downloads UI. True by default.
 		 * 
 		 * @param isVisible
 		 *            whether to display this download in the Downloads UI
@@ -580,7 +484,7 @@ public class DownloadManager {
 			values.put(Downloads.COLUMN_NOTIFICATION_PACKAGE, packageName);// 通知时候的包名
 
 			if (mDestinationUri != null) {
-				values.put(Downloads.COLUMN_DESTINATION, Downloads.DESTINATION_FILE_URI);//这个需要权限
+				values.put(Downloads.COLUMN_DESTINATION, Downloads.DESTINATION_FILE_URI);// 这个需要权限
 				values.put(Downloads.COLUMN_FILE_NAME_HINT, mDestinationUri.toString());
 			} else {
 				values.put(Downloads.COLUMN_DESTINATION, Downloads.DESTINATION_EXTERNAL);
@@ -671,8 +575,7 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 指定状态查询 Include only downloads with status matching any the given
-		 * status flags.
+		 * 指定状态查询 Include only downloads with status matching any the given status flags.
 		 * 
 		 * @param flags
 		 *            any combination of the STATUS_* bit flags
@@ -684,14 +587,10 @@ public class DownloadManager {
 		}
 
 		/**
-		 * Controls whether this query includes downloads not visible in the
-		 * system's Downloads UI.
+		 * Controls whether this query includes downloads not visible in the system's Downloads UI.
 		 * 
 		 * @param value
-		 *            if true, this query will only include downloads that
-		 *            should be displayed in the system's Downloads UI; if false
-		 *            (the default), this query will include both visible and
-		 *            invisible downloads.
+		 *            if true, this query will only include downloads that should be displayed in the system's Downloads UI; if false (the default), this query will include both visible and invisible downloads.
 		 * @return this object
 		 * @hide
 		 */
@@ -701,16 +600,12 @@ public class DownloadManager {
 		}
 
 		/**
-		 * 排序 ,只能以ORDER_ASCENDING或者ORDER_DESCENDING Change the sort order of the
-		 * returned Cursor.
+		 * 排序 ,只能以ORDER_ASCENDING或者ORDER_DESCENDING Change the sort order of the returned Cursor.
 		 * 
 		 * @param column
-		 *            one of the COLUMN_* constants; currently, only
-		 *            {@link #COLUMN_LAST_MODIFIED_TIMESTAMP} and
-		 *            {@link #COLUMN_TOTAL_SIZE_BYTES} are supported.
+		 *            one of the COLUMN_* constants; currently, only {@link #COLUMN_LAST_MODIFIED_TIMESTAMP} and {@link #COLUMN_TOTAL_SIZE_BYTES} are supported.
 		 * @param direction
-		 *            either {@link #ORDER_ASCENDING} or
-		 *            {@link #ORDER_DESCENDING}
+		 *            either {@link #ORDER_ASCENDING} or {@link #ORDER_DESCENDING}
 		 * @return this object
 		 * @hide
 		 */
@@ -815,11 +710,9 @@ public class DownloadManager {
 		mPackageName = packageName;
 	}
 
+
 	/**
-	 * 使这个对象访问下载商通过/而不是/ my_downloads all_downloads URI的URI，这允许这样做的客户。 Makes
-	 * this object access the download provider through /all_downloads URIs
-	 * rather than /my_downloads URIs, for clients that have permission to do
-	 * so.
+	 * 使这个对象访问下载商通过/而不是/ my_downloads all_downloads URI的URI，这允许这样做的客户。 Makes this object access the download provider through /all_downloads URIs rather than /my_downloads URIs, for clients that have permission to do so.
 	 * 
 	 * @hide
 	 */
@@ -832,15 +725,11 @@ public class DownloadManager {
 	}
 
 	/**
-	 * 将Request传人到Downloadmanager中来，然后request会被转会为ContentValues，然后插入到内容提供者中，
-	 * 返回的是下载数据库中的Id主键 插入有会触发下载 Enqueue a new download. The download will start
-	 * automatically once the download manager is ready to execute it and
-	 * connectivity is available.
+	 * 将Request传人到Downloadmanager中来，然后request会被转会为ContentValues，然后插入到内容提供者中， 返回的是下载数据库中的Id主键 插入有会触发下载 Enqueue a new download. The download will start automatically once the download manager is ready to execute it and connectivity is available.
 	 * 
 	 * @param request
 	 *            the parameters specifying this download
-	 * @return an ID for the download, unique across the system. This ID is used
-	 *         to make future calls related to this download.
+	 * @return an ID for the download, unique across the system. This ID is used to make future calls related to this download.
 	 */
 	public long enqueue(Request request) {
 		ContentValues values = request.toContentValues(mPackageName);
@@ -850,10 +739,7 @@ public class DownloadManager {
 	}
 
 	/**
-	 * Marks the specified download as 'to be deleted'. This is done when a
-	 * completed download is to be removed but the row was stored without enough
-	 * info to delete the corresponding metadata from Mediaprovider database.
-	 * Actual cleanup of this row is done in DownloadService.
+	 * Marks the specified download as 'to be deleted'. This is done when a completed download is to be removed but the row was stored without enough info to delete the corresponding metadata from Mediaprovider database. Actual cleanup of this row is done in DownloadService.
 	 * 
 	 * @param ids
 	 *            the IDs of the downloads to be marked 'deleted'
@@ -871,10 +757,7 @@ public class DownloadManager {
 	}
 
 	/**
-	 * 删除一个下载 Cancel downloads and remove them from the download manager. Each
-	 * download will be stopped if it was running, and it will no longer be
-	 * accessible through the download manager. If a file was already downloaded
-	 * to external storage, it will not be deleted.
+	 * 删除一个下载 Cancel downloads and remove them from the download manager. Each download will be stopped if it was running, and it will no longer be accessible through the download manager. If a file was already downloaded to external storage, it will not be deleted.
 	 * 
 	 * @param ids
 	 *            the IDs of the downloads to remove
@@ -889,13 +772,11 @@ public class DownloadManager {
 	}
 
 	/**
-	 * 根据query得到cursor Query the download manager about downloads that have been
-	 * requested.
+	 * 根据query得到cursor Query the download manager about downloads that have been requested.
 	 * 
 	 * @param query
 	 *            parameters specifying filters for this query
-	 * @return a Cursor over the result set of downloads, with columns
-	 *         consisting of all the COLUMN_* constants.
+	 * @return a Cursor over the result set of downloads, with columns consisting of all the COLUMN_* constants.
 	 */
 	public Cursor query(Query query) {
 		Cursor underlyingCursor = query.runQuery(mResolver, UNDERLYING_COLUMNS, mBaseUri);
@@ -919,8 +800,7 @@ public class DownloadManager {
 	}
 
 	/**
-	 * 暂停 下载 Pause the given downloads, which must be running. This method will
-	 * only work when called from within the download manager's process.
+	 * 暂停 下载 Pause the given downloads, which must be running. This method will only work when called from within the download manager's process.
 	 * 
 	 * @param ids
 	 *            the IDs of the downloads
@@ -946,8 +826,7 @@ public class DownloadManager {
 	}
 
 	/**
-	 * 继续下载 Resume the given downloads, which must be paused. This method will
-	 * only work when called from within the download manager's process.
+	 * 继续下载 Resume the given downloads, which must be paused. This method will only work when called from within the download manager's process.
 	 * 
 	 * @param ids
 	 *            the IDs of the downloads
@@ -973,9 +852,7 @@ public class DownloadManager {
 	}
 
 	/**
-	 * 重新下载 Restart the given downloads, which must have already completed
-	 * (successfully or not). This method will only work when called from within
-	 * the download manager's process.
+	 * 重新下载 Restart the given downloads, which must have already completed (successfully or not). This method will only work when called from within the download manager's process.
 	 * 
 	 * @param ids
 	 *            the IDs of the downloads
@@ -1003,16 +880,14 @@ public class DownloadManager {
 	}
 
 	/**
-	 * 根据id获取下载的uri Get the DownloadProvider URI for the download with the given
-	 * ID.
+	 * 根据id获取下载的uri Get the DownloadProvider URI for the download with the given ID.
 	 */
 	Uri getDownloadUri(long id) {
 		return ContentUris.withAppendedId(mBaseUri, id);
 	}
 
 	/**
-	 * 把数据拼接为字符串个数据库操作的 Get a parameterized SQL WHERE clause to select a bunch
-	 * of IDs.
+	 * 把数据拼接为字符串个数据库操作的 Get a parameterized SQL WHERE clause to select a bunch of IDs.
 	 */
 	static String getWhereClauseForIds(long[] ids) {
 		StringBuilder whereClause = new StringBuilder();
@@ -1029,8 +904,7 @@ public class DownloadManager {
 	}
 
 	/**
-	 * Long转string Get the selection args for a clause returned by
-	 * {@link #getWhereClauseForIds(long[])}.
+	 * Long转string Get the selection args for a clause returned by {@link #getWhereClauseForIds(long[])}.
 	 */
 	static String[] getWhereArgsForIds(long[] ids) {
 		String[] whereArgs = new String[ids.length];
@@ -1041,11 +915,7 @@ public class DownloadManager {
 	}
 
 	/**
-	 * 对CursorWrapper再次进行封装，提高效率 This class wraps a cursor returned by
-	 * DownloadProvider -- the "underlying cursor" -- and presents a different
-	 * set of columns, those defined in the DownloadManager.COLUMN_* constants.
-	 * Some columns correspond directly to underlying values while others are
-	 * computed from underlying data.
+	 * 对CursorWrapper再次进行封装，提高效率 This class wraps a cursor returned by DownloadProvider -- the "underlying cursor" -- and presents a different set of columns, those defined in the DownloadManager.COLUMN_* constants. Some columns correspond directly to underlying values while others are computed from underlying data.
 	 */
 	private static class CursorTranslator extends CursorWrapper {
 		public CursorTranslator(Cursor cursor, Uri baseUri) {

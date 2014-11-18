@@ -64,5 +64,5 @@ interface SystemFacade {
     /**
      * Start a thread.
      */
-    public void startThread(Thread thread);
+    public void startThread(Thread thread, boolean joinToThreadPool);
 }
