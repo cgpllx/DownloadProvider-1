@@ -226,6 +226,8 @@ public class DownloadThread extends Thread {
 
 		processResponseHeaders(state, innerState, response);
 		InputStream entityStream = openResponseEntity(state, response);// 读取输入流
+		
+		
 		transferData(state, innerState, data, entityStream);// 将尽可能多的数据到目标文件的HTTP响应。
 	}
 
@@ -736,7 +738,7 @@ public class DownloadThread extends Thread {
 					// scratch
 					f.delete();
 					state.mFilename = null;
-				} else if (mInfo.mETag == null && !mInfo.mNoIntegrity) {
+				} else if (mInfo.mETag == null && !mInfo.mNoIntegrity) {//mInfo.mNoIntegrity，一直为true
 					// This should've been caught upon failure
 					f.delete();
 					throw new StopRequest(Downloads.STATUS_CANNOT_RESUME, "Trying to resume a download that can't be resumed");
