@@ -55,6 +55,7 @@ public class DownloadThread extends Thread {
 		mSystemFacade = systemFacade;
 		mInfo = info;
 	}
+ 
 
 	/**
 	 * Returns the user agent provided by the initiating app, or use the default one

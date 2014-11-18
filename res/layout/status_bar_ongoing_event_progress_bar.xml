@@ -18,19 +18,20 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="@android:drawable/status_bar_item_app_background"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#181818"
     android:orientation="vertical" >
 
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
         <LinearLayout
-            android:layout_width="40dp"
-            android:layout_height="fill_parent"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="#1D3741"
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
@@ -48,15 +49,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:text="progress_text" />
         </LinearLayout>
 
         <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:clickable="true"
             android:focusable="true"
-            android:orientation="vertical" >
+            android:orientation="vertical"
+            android:paddingLeft="10dp" >
 
             <LinearLayout
                 android:layout_width="fill_parent"
@@ -71,15 +74,17 @@
                     android:id="@+id/title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="2dp"
-                    android:singleLine="true" />
+                    android:paddingLeft="0dp"
+                    android:singleLine="true"
+                    android:text="title" />
 
                 <TextView
                     android:id="@+id/description"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="5dp"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:text="description" />
             </LinearLayout>
             <!-- Only one of progress_bar and paused_text will be visible. -->
 
@@ -99,12 +104,13 @@
                 android:layout_alignParentBottom="true"
                 android:paddingBottom="8dp"
                 android:paddingLeft="5dp"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:text="paused_text" />
         </RelativeLayout>
     </LinearLayout>
 
     <ImageView
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:src="@android:drawable/divider_horizontal_bright" />
 

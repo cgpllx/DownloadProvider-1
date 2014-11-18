@@ -64,13 +64,11 @@ public final class DownloadProvider extends ContentProvider {
 	/** 匹配器(不匹配)URI matcher used to recognize URIs sent by applications */
 	private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 	/**
-	 * 我的下载匹配的返回值 URI matcher constant for the URI of all downloads belonging to
-	 * the calling UID
+	 * 我的下载匹配的返回值 URI matcher constant for the URI of all downloads belonging to the calling UID
 	 */
 	private static final int MY_DOWNLOADS = 1;
 	/**
-	 * 我的下载中指定id的返回值 URI matcher constant for the URI of an individual download
-	 * belonging to the calling UID
+	 * 我的下载中指定id的返回值 URI matcher constant for the URI of an individual download belonging to the calling UID
 	 */
 	private static final int MY_DOWNLOADS_ID = 2;
 	/** 所有下载的返回值URI matcher constant for the URI of all downloads in the system */
@@ -126,11 +124,7 @@ public final class DownloadProvider extends ContentProvider {
 	SystemFacade mSystemFacade;
 
 	/**
-	 * This class encapsulates a SQL where clause and its parameters. It makes
-	 * it possible for shared methods (like
-	 * {@link DownloadProvider#getWhereClause(Uri, String, String[], int)}) to
-	 * return both pieces of information, and provides some utility logic to
-	 * ease piece-by-piece construction of selections.
+	 * This class encapsulates a SQL where clause and its parameters. It makes it possible for shared methods (like {@link DownloadProvider#getWhereClause(Uri, String, String[], int)}) to return both pieces of information, and provides some utility logic to ease piece-by-piece construction of selections.
 	 */
 	private static class SqlSelection {
 		public StringBuilder mWhereClause = new StringBuilder();
@@ -164,10 +158,7 @@ public final class DownloadProvider extends ContentProvider {
 	}
 
 	/**
-	 * Creates and updated database on demand when opening it. Helper class to
-	 * create database the first time the provider is initialized and upgrade it
-	 * when a new version of the provider needs an updated version of the
-	 * database.
+	 * Creates and updated database on demand when opening it. Helper class to create database the first time the provider is initialized and upgrade it when a new version of the provider needs an updated version of the database.
 	 */
 	private final class DatabaseHelper extends SQLiteOpenHelper {
 		public DatabaseHelper(final Context context) {
@@ -186,11 +177,9 @@ public final class DownloadProvider extends ContentProvider {
 		}
 
 		/**
-		 * Updates the database format when a content provider is used with a
-		 * database that was created with a different format.
+		 * Updates the database format when a content provider is used with a database that was created with a different format.
 		 * 
-		 * Note: to support downgrades, creating a table should always drop it
-		 * first if it already exists.
+		 * Note: to support downgrades, creating a table should always drop it first if it already exists.
 		 */
 		@Override
 		public void onUpgrade(final SQLiteDatabase db, int oldV, final int newV) {
@@ -210,58 +199,49 @@ public final class DownloadProvider extends ContentProvider {
 				// DB, so just recreate it
 				Log.i(Constants.TAG, "Downgrading downloads database from version " + oldV + " (current version is " + newV + "), destroying all old data");
 				oldV = 99;
-			}
-
+			} // 99
+				// -------------- -oldV--0--------------newV-- 106
 			for (int version = oldV + 1; version <= newV; version++) {
 				upgradeTo(db, version);
 			}
 		}
 
 		/**
-		 * Upgrade database from (version - 1) to version.
+		 * 升级数据库（版本1）的版本。 Upgrade database from (version - 1) to version.
 		 */
 		private void upgradeTo(SQLiteDatabase db, int version) {
 			switch (version) {
 			case 100:
 				createDownloadsTable(db);
 				break;
-
 			case 101:
 				createHeadersTable(db);
 				break;
-
 			case 102:
 				addColumn(db, DB_TABLE, Downloads.COLUMN_IS_PUBLIC_API, "INTEGER NOT NULL DEFAULT 0");
 				addColumn(db, DB_TABLE, Downloads.COLUMN_ALLOW_ROAMING, "INTEGER NOT NULL DEFAULT 0");
 				addColumn(db, DB_TABLE, Downloads.COLUMN_ALLOWED_NETWORK_TYPES, "INTEGER NOT NULL DEFAULT 0");
 				break;
-
 			case 103:
 				addColumn(db, DB_TABLE, Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, "INTEGER NOT NULL DEFAULT 1");
 				makeCacheDownloadsInvisible(db);
 				break;
-
 			case 104:
 				addColumn(db, DB_TABLE, Downloads.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT, "INTEGER NOT NULL DEFAULT 0");
 				break;
-
 			case 105:
 				fillNullValues(db);
 				break;
-
 			case 106:
 				addColumn(db, DB_TABLE, Downloads.COLUMN_DELETED, "BOOLEAN NOT NULL DEFAULT 0");
 				break;
-
 			default:
 				throw new IllegalStateException("Don't know how to upgrade to " + version);
 			}
 		}
 
 		/**
-		 * insert() now ensures these four columns are never null for new
-		 * downloads, so this method makes that true for existing columns, so
-		 * that code can rely on this assumption.
+		 * insert() now ensures these four columns are never null for new downloads, so this method makes that true for existing columns, so that code can rely on this assumption.
 		 */
 		private void fillNullValues(SQLiteDatabase db) {
 			ContentValues values = new ContentValues();
@@ -282,8 +262,7 @@ public final class DownloadProvider extends ContentProvider {
 		}
 
 		/**
-		 * Set all existing downloads to the cache partition to be invisible in
-		 * the downloads UI.
+		 * Set all existing downloads to the cache partition to be invisible in the downloads UI.
 		 */
 		private void makeCacheDownloadsInvisible(SQLiteDatabase db) {
 			ContentValues values = new ContentValues();
@@ -311,7 +290,7 @@ public final class DownloadProvider extends ContentProvider {
 		 */
 		private void createDownloadsTable(SQLiteDatabase db) {
 			try {
-				db.execSQL("DROP TABLE IF EXISTS " + DB_TABLE);
+				db.execSQL("DROP TABLE IF EXISTS " + DB_TABLE);// 表名downloads
 				db.execSQL("CREATE TABLE " + DB_TABLE + "(" //
 						+ Downloads._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," //
 						+ Downloads.COLUMN_URI + " TEXT, " //
@@ -349,8 +328,13 @@ public final class DownloadProvider extends ContentProvider {
 		}
 
 		private void createHeadersTable(SQLiteDatabase db) {
-			db.execSQL("DROP TABLE IF EXISTS " + Downloads.RequestHeaders.HEADERS_DB_TABLE);
-			db.execSQL("CREATE TABLE " + Downloads.RequestHeaders.HEADERS_DB_TABLE + "(" + "id INTEGER PRIMARY KEY AUTOINCREMENT," + Downloads.RequestHeaders.COLUMN_DOWNLOAD_ID + " INTEGER NOT NULL," + Downloads.RequestHeaders.COLUMN_HEADER + " TEXT NOT NULL," + Downloads.RequestHeaders.COLUMN_VALUE + " TEXT NOT NULL" + ");");
+			db.execSQL("DROP TABLE IF EXISTS " + Downloads.RequestHeaders.HEADERS_DB_TABLE);// 表名request_headers
+			db.execSQL("CREATE TABLE " + Downloads.RequestHeaders.HEADERS_DB_TABLE + "("//
+					+ "id INTEGER PRIMARY KEY AUTOINCREMENT," // 主键
+					+ Downloads.RequestHeaders.COLUMN_DOWNLOAD_ID + " INTEGER NOT NULL,"// downloads表中的id
+					+ Downloads.RequestHeaders.COLUMN_HEADER + " TEXT NOT NULL," // herder-key
+					+ Downloads.RequestHeaders.COLUMN_VALUE + " TEXT NOT NULL"// herder-value
+					+ ");");
 		}
 	}
 
@@ -368,8 +352,7 @@ public final class DownloadProvider extends ContentProvider {
 	}
 
 	/**
-	 * Returns the content-provider-style MIME types of the various types
-	 * accessible through this content provider.
+	 * Returns the content-provider-style MIME types of the various types accessible through this content provider.
 	 */
 	@Override
 	public String getType(final Uri uri) {
@@ -504,9 +487,9 @@ public final class DownloadProvider extends ContentProvider {
 		}
 
 		insertRequestHeaders(db, rowID, values);// 插入请求头信息
-		context.startService(new Intent(context, DownloadService.class));//// 启动服务222why
-		notifyContentChanged(uri, match);//通知监听者内容改变
-		return ContentUris.withAppendedId(Downloads.CONTENT_URI, rowID);//返回带id的uri
+		context.startService(new Intent(context, DownloadService.class));// // 启动服务222why
+		notifyContentChanged(uri, match);// 通知监听者内容改变
+		return ContentUris.withAppendedId(Downloads.CONTENT_URI, rowID);// 返回带id的uri
 	}
 
 	/**
@@ -533,10 +516,7 @@ public final class DownloadProvider extends ContentProvider {
 	}
 
 	/**
-	 * 检测权限 Apps with the ACCESS_DOWNLOAD_MANAGER permission can access this
-	 * provider freely, subject to constraints in the rest of the code. Apps
-	 * without that may still access this provider through the public API, but
-	 * additional restrictions are imposed. We check those restrictions here.
+	 * 检测权限 Apps with the ACCESS_DOWNLOAD_MANAGER permission can access this provider freely, subject to constraints in the rest of the code. Apps without that may still access this provider through the public API, but additional restrictions are imposed. We check those restrictions here.
 	 * 
 	 * @param values
 	 *            ContentValues provided to insert()
@@ -604,8 +584,7 @@ public final class DownloadProvider extends ContentProvider {
 	}
 
 	/**
-	 * Remove column from values, and throw a SecurityException if the value
-	 * isn't within the specified allowedValues.
+	 * Remove column from values, and throw a SecurityException if the value isn't within the specified allowedValues.
 	 */
 	private void enforceAllowedValues(ContentValues values, String column, Object... allowedValues) {
 		Object value = values.get(column);

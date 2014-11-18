@@ -34,11 +34,9 @@ public class DownloadProviderActivity extends Activity implements OnClickListene
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-
 		mDownloadManager = new DownloadManager(getContentResolver(), getPackageName());
 		buildComponents();
 		startDownloadService();
-
 		mReceiver = new BroadcastReceiver() {
 
 			@Override
@@ -102,6 +100,7 @@ public class DownloadProviderActivity extends Activity implements OnClickListene
 		DownloadManager.Request request = new Request(srcUri);
 		request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/");
 		request.setDescription("Just for test");
+		request.setTitle("智慧市场");
 		mDownloadManager.enqueue(request);
 	}
 }
