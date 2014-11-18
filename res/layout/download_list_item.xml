@@ -17,7 +17,7 @@
 */
 -->
 
-<com.mozillaonline.providers.downloads.ui.DownloadItem xmlns:android="http://schemas.android.com/apk/res/android"
+<com.kubeiwu.providers.downloads.ui.DownloadItem xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:descendantFocusability="blocksDescendants"
@@ -88,9 +88,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/download_progress"
-        android:layout_toRightOf="@id/status_text"
+        android:layout_toRightOf="@id/status_text"  
         android:maxLines="1"
         android:paddingLeft="15dp"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
-</com.mozillaonline.providers.downloads.ui.DownloadItem>
+</com.kubeiwu.providers.downloads.ui.DownloadItem>

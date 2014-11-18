@@ -54,7 +54,7 @@
 
         <provider
             android:name="com.kubeiwu.providers.downloads.DownloadProvider"
-            android:authorities="com.mozillaonline.downloads" />
+            android:authorities="com.kubeiwu.downloads" />
 
         <service android:name="com.kubeiwu.providers.downloads.DownloadService" />
 
