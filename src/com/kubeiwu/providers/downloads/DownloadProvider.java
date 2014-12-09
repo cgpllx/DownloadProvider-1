@@ -378,7 +378,7 @@ public final class DownloadProvider extends ContentProvider {
 	 */
 	@Override
 	public Uri insert(final Uri uri, final ContentValues values) {
-		checkInsertPermissions(values);// 检测权限
+//		checkInsertPermissions(values);// 检测权限
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();// 获取db
 
 		// note we disallow inserting into ALL_DOWNLOADS我们不接受插入ALL_DOWNLOADS
