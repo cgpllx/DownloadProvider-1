@@ -339,7 +339,14 @@ public class DownloadManager {
 		 */
 		public Request setDestinationInExternalFilesDir(Context context, String dirType, String subPath) {
 			// 下载的文件保存到sd卡
-			setDestinationFromBase(context.getExternalFilesDir(dirType), subPath);
+
+			String dirPath = Environment.getExternalStorageDirectory().getPath() + "/" + dirType + "/";
+			File dir = new File(dirPath);
+			if (!dir.exists()) {
+				dir.mkdir();
+			}
+			setDestinationFromBase(dir, subPath);
+			// setDestinationFromBase(context.getExternalFilesDir(dirType), subPath);
 			return this;
 		}
 
@@ -708,7 +715,6 @@ public class DownloadManager {
 		mResolver = resolver;
 		mPackageName = packageName;
 	}
-
 
 	/**
 	 * 使这个对象访问下载商通过/而不是/ my_downloads all_downloads URI的URI，这允许这样做的客户。 Makes this object access the download provider through /all_downloads URIs rather than /my_downloads URIs, for clients that have permission to do so.
