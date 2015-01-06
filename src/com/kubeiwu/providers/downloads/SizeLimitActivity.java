@@ -126,9 +126,9 @@ public class SizeLimitActivity extends Activity
     public void onClick(DialogInterface dialog, int which) {
         boolean isRequired =
                 mCurrentIntent.getExtras().getBoolean(DownloadInfo.EXTRA_IS_WIFI_REQUIRED);
-        if (isRequired && which == AlertDialog.BUTTON_NEGATIVE) {
+        if (isRequired && which == DialogInterface.BUTTON_NEGATIVE) {
             getContentResolver().delete(mCurrentUri, null, null);
-        } else if (!isRequired && which == AlertDialog.BUTTON_POSITIVE) {
+        } else if (!isRequired && which == DialogInterface.BUTTON_POSITIVE) {
             ContentValues values = new ContentValues();
             values.put(Downloads.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT, true);
             getContentResolver().update(mCurrentUri, values , null, null);

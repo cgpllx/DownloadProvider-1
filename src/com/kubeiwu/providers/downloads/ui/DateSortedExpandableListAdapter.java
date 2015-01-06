@@ -270,7 +270,8 @@ public class DateSortedExpandableListAdapter implements ExpandableListAdapter {
         mCursor.requery();
     }
 
-    public View getGroupView(int groupPosition, boolean isExpanded,
+    @Override
+	public View getGroupView(int groupPosition, boolean isExpanded,
             View convertView, ViewGroup parent) {
         TextView item;
         if (null == convertView || !(convertView instanceof TextView)) {
@@ -284,73 +285,90 @@ public class DateSortedExpandableListAdapter implements ExpandableListAdapter {
         return item;
     }
 
-    public View getChildView(int groupPosition, int childPosition,
+    @Override
+	public View getChildView(int groupPosition, int childPosition,
             boolean isLastChild, View convertView, ViewGroup parent) {
         return null;
     }
 
-    public boolean areAllItemsEnabled() {
+    @Override
+	public boolean areAllItemsEnabled() {
         return true;
     }
 
-    public boolean isChildSelectable(int groupPosition, int childPosition) {
+    @Override
+	public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
     }
 
-    public int getGroupCount() {
+    @Override
+	public int getGroupCount() {
         return mNumberOfBins;
     }
 
-    public int getChildrenCount(int groupPosition) {
+    @Override
+	public int getChildrenCount(int groupPosition) {
         return mItemMap[groupPositionToBin(groupPosition)];
     }
 
-    public Object getGroup(int groupPosition) {
+    @Override
+	public Object getGroup(int groupPosition) {
         return null;
     }
 
-    public Object getChild(int groupPosition, int childPosition) {
+    @Override
+	public Object getChild(int groupPosition, int childPosition) {
         return null;
     }
 
-    public long getGroupId(int groupPosition) {
+    @Override
+	public long getGroupId(int groupPosition) {
         return groupPosition;
     }
 
-    public long getChildId(int groupPosition, int childPosition) {
+    @Override
+	public long getChildId(int groupPosition, int childPosition) {
         if (moveCursorToChildPosition(groupPosition, childPosition)) {
             return getLong(mIdIndex);
         }
         return 0;
     }
 
-    public boolean hasStableIds() {
+    @Override
+	public boolean hasStableIds() {
         return true;
     }
 
-    public void registerDataSetObserver(DataSetObserver observer) {
+    @Override
+	public void registerDataSetObserver(DataSetObserver observer) {
         mObservers.add(observer);
     }
 
-    public void unregisterDataSetObserver(DataSetObserver observer) {
+    @Override
+	public void unregisterDataSetObserver(DataSetObserver observer) {
         mObservers.remove(observer);
     }
 
-    public void onGroupExpanded(int groupPosition) {
+    @Override
+	public void onGroupExpanded(int groupPosition) {
     }
 
-    public void onGroupCollapsed(int groupPosition) {
+    @Override
+	public void onGroupCollapsed(int groupPosition) {
     }
 
-    public long getCombinedChildId(long groupId, long childId) {
+    @Override
+	public long getCombinedChildId(long groupId, long childId) {
         return childId;
     }
 
-    public long getCombinedGroupId(long groupId) {
+    @Override
+	public long getCombinedGroupId(long groupId) {
         return groupId;
     }
 
-    public boolean isEmpty() {
+    @Override
+	public boolean isEmpty() {
         return mCursor.isClosed() || mCursor.getCount() == 0;
     }
 }

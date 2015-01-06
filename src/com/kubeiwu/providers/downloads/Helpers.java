@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.StatFs;
 import android.os.SystemClock;
+import android.provider.BaseColumns;
 import android.util.Config;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -689,6 +690,6 @@ public class Helpers {
 		} catch (Exception e) {
 			Log.w(Constants.TAG, "file: '" + path + "' couldn't be deleted", e);
 		}
-		resolver.delete(Downloads.ALL_DOWNLOADS_CONTENT_URI, Downloads._ID + " = ? ", new String[] { String.valueOf(id) });
+		resolver.delete(Downloads.ALL_DOWNLOADS_CONTENT_URI, BaseColumns._ID + " = ? ", new String[] { String.valueOf(id) });
 	}
 }

@@ -29,6 +29,7 @@ public class RealSystemFacade implements SystemFacade {
 	/**
 	 * 获取当前时间戳
 	 */
+	@Override
 	public long currentTimeMillis() {
 		return System.currentTimeMillis();
 	}
@@ -36,6 +37,7 @@ public class RealSystemFacade implements SystemFacade {
 	/**
 	 * 获取网络类型
 	 */
+	@Override
 	public Integer getActiveNetworkType() {
 		ConnectivityManager connectivity = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 		if (connectivity == null) {
@@ -56,6 +58,7 @@ public class RealSystemFacade implements SystemFacade {
 	/**
 	 * 网络是否漫游
 	 */
+	@Override
 	public boolean isNetworkRoaming() {
 		ConnectivityManager connectivity = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 		if (connectivity == null) {
@@ -73,6 +76,7 @@ public class RealSystemFacade implements SystemFacade {
 		return isRoaming;
 	}
 
+	@Override
 	public Long getMaxBytesOverMobile() {
 		return DOWNLOAD_MAX_BYTES_OVER_MOBILE;
 	}

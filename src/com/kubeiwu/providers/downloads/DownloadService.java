@@ -36,6 +36,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
+import android.provider.BaseColumns;
 import android.util.Log;
 
 /**
@@ -86,6 +87,7 @@ public class DownloadService extends Service {
 		 * Receives notification when the data in the observed content provider
 		 * changes.
 		 */
+		@Override
 		public void onChange(final boolean selfChange) {
 			if (Constants.LOGVV) {
 				Log.v(Constants.TAG, "Service ContentObserver received notification");
@@ -101,6 +103,7 @@ public class DownloadService extends Service {
 	 * 
 	 * @throws UnsupportedOperationException
 	 */
+	@Override
 	public IBinder onBind(Intent i) {
 		throw new UnsupportedOperationException("Cannot bind to Download Manager Service");
 	}
@@ -108,6 +111,7 @@ public class DownloadService extends Service {
 	/**
 	 * Initializes the service when it is first created
 	 */
+	@Override
 	public void onCreate() {
 		super.onCreate();
 		if (Constants.LOGVV) {
@@ -140,6 +144,7 @@ public class DownloadService extends Service {
 	/**
 	 * Cleans up when the service is destroyed
 	 */
+	@Override
 	public void onDestroy() {
 		getContentResolver().unregisterContentObserver(mObserver);
 		if (Constants.LOGVV) {
@@ -166,6 +171,7 @@ public class DownloadService extends Service {
 			super("Download Service");
 		}
 
+		@Override
 		public void run() {
 			Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);// 最高
 
@@ -205,7 +211,7 @@ public class DownloadService extends Service {
 				}
 				try {
 					DownloadInfo.Reader reader = new DownloadInfo.Reader(getContentResolver(), cursor);
-					int idColumn = cursor.getColumnIndexOrThrow(Downloads._ID);
+					int idColumn = cursor.getColumnIndexOrThrow(BaseColumns._ID);
 
 					for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
 						long id = cursor.getLong(idColumn);
@@ -320,7 +326,7 @@ public class DownloadService extends Service {
 	 */
 	private void trimDatabase() {
 		Cursor cursor = getContentResolver().query(Downloads.ALL_DOWNLOADS_CONTENT_URI, //
-				new String[] { Downloads._ID }, Downloads.COLUMN_STATUS + " >= '200'", null, Downloads.COLUMN_LAST_MODIFICATION);// Downloads.COLUMN_LAST_MODIFICATION排序
+				new String[] { BaseColumns._ID }, Downloads.COLUMN_STATUS + " >= '200'", null, Downloads.COLUMN_LAST_MODIFICATION);// Downloads.COLUMN_LAST_MODIFICATION排序
 		if (cursor == null) {
 			// This isn't good - if we can't do basic queries in our database,
 			// nothing's gonna work
@@ -329,7 +335,7 @@ public class DownloadService extends Service {
 		}
 		if (cursor.moveToFirst()) {
 			int numDelete = cursor.getCount() - Constants.MAX_DOWNLOADS;
-			int columnId = cursor.getColumnIndexOrThrow(Downloads._ID);
+			int columnId = cursor.getColumnIndexOrThrow(BaseColumns._ID);
 			while (numDelete > 0) {
 				Uri downloadUri = ContentUris.withAppendedId(Downloads.ALL_DOWNLOADS_CONTENT_URI, cursor.getLong(columnId));
 				getContentResolver().delete(downloadUri, null, null);

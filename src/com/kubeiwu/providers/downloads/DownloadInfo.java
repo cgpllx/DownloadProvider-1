@@ -30,6 +30,7 @@ import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.util.Log;
 import android.util.Pair;
 
@@ -58,7 +59,7 @@ public class DownloadInfo {
 		}
 
 		public void updateFromDatabase(DownloadInfo info) {
-			info.mId = getLong(Downloads._ID);
+			info.mId = getLong(BaseColumns._ID);
 			info.mUri = getString(info.mUri, Downloads.COLUMN_URI);
 			info.mNoIntegrity = getInt(Downloads.COLUMN_NO_INTEGRITY) == 1;
 			info.mHint = getString(info.mHint, Downloads.COLUMN_FILE_NAME_HINT);

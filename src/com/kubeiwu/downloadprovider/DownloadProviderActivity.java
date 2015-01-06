@@ -76,16 +76,21 @@ public class DownloadProviderActivity extends Activity implements OnClickListene
 	@Override
 	public void onClick(View v) {
 		int id = v.getId();
-		switch (id) {
-		case R.id.start_download_button:
+		if (R.id.start_download_button == id) {
 			startDownload();
-			break;
-		case R.id.show_download_list_button:
+		} else if (R.id.show_download_list_button == id) {
 			showDownloadList();
-			break;
-		default:
-			break;
 		}
+		// switch (id) {
+		// case R.id.start_download_button:
+		// startDownload();
+		// break;
+		// case R.id.show_download_list_button:
+		// showDownloadList();
+		// break;
+		// default:
+		// break;
+		// }
 	}
 
 	private void showDownloadList() {

@@ -136,6 +136,7 @@ public class DownloadThread extends Thread {
 	/**
 	 * Executes the download in a separate thread
 	 */
+	@Override
 	@SuppressLint("Wakelock")
 	public void run() {
 		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);

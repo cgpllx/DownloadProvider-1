@@ -28,6 +28,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.kubeiwu.providers.DownloadManager;
@@ -38,7 +39,8 @@ import com.kubeiwu.providers.DownloadManager;
 public class DownloadReceiver extends BroadcastReceiver {
     SystemFacade mSystemFacade = null;
 
-    public void onReceive(Context context, Intent intent) {
+    @Override
+	public void onReceive(Context context, Intent intent) {
         if (mSystemFacade == null) {
             mSystemFacade = new RealSystemFacade(context);
         }
@@ -175,7 +177,7 @@ public class DownloadReceiver extends BroadcastReceiver {
             if (intent.getBooleanExtra("multiple", true)) {
                 appIntent.setData(Downloads.CONTENT_URI);
             } else {
-                long downloadId = cursor.getLong(cursor.getColumnIndexOrThrow(Downloads._ID));
+                long downloadId = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
                 appIntent.setData(
                         ContentUris.withAppendedId(Downloads.CONTENT_URI, downloadId));
             }

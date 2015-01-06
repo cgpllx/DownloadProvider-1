@@ -43,6 +43,7 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.provider.BaseColumns;
 import android.util.Log;
 
 /**
@@ -292,7 +293,7 @@ public final class DownloadProvider extends ContentProvider {
 			try {
 				db.execSQL("DROP TABLE IF EXISTS " + DB_TABLE);// 表名downloads
 				db.execSQL("CREATE TABLE " + DB_TABLE + "(" //
-						+ Downloads._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," //
+						+ BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," //
 						+ Downloads.COLUMN_URI + " TEXT, " //
 						+ Constants.RETRY_AFTER_X_REDIRECT_COUNT + " INTEGER, "//
 						+ Downloads.COLUMN_APP_DATA + " TEXT, " //
@@ -733,7 +734,7 @@ public final class DownloadProvider extends ContentProvider {
 	 * Delete request headers for downloads matching the given query.
 	 */
 	private void deleteRequestHeaders(SQLiteDatabase db, String where, String[] whereArgs) {
-		String[] projection = new String[] { Downloads._ID };
+		String[] projection = new String[] { BaseColumns._ID };
 		Cursor cursor = db.query(DB_TABLE, projection, where, whereArgs, null, null, null, null);
 		try {
 			for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -852,7 +853,7 @@ public final class DownloadProvider extends ContentProvider {
 		SqlSelection selection = new SqlSelection();
 		selection.appendClause(where, whereArgs);
 		if (uriMatch == MY_DOWNLOADS_ID || uriMatch == ALL_DOWNLOADS_ID) {
-			selection.appendClause(Downloads._ID + " = ?", getDownloadIdFromUri(uri));
+			selection.appendClause(BaseColumns._ID + " = ?", getDownloadIdFromUri(uri));
 		}
 		if ((uriMatch == MY_DOWNLOADS || uriMatch == MY_DOWNLOADS_ID) && getContext().checkCallingPermission(Downloads.PERMISSION_ACCESS_ALL) != PackageManager.PERMISSION_GRANTED) {
 			selection.appendClause(Constants.UID + "= ? OR " + Downloads.COLUMN_OTHER_UID + "= ?", Binder.getCallingUid(), Binder.getCallingPid());
@@ -1016,14 +1017,17 @@ public final class DownloadProvider extends ContentProvider {
 			throw new SecurityException("Download manager cursors are read-only");
 		}
 
+		@Override
 		public void fillWindow(int pos, CursorWindow window) {
 			mCursor.fillWindow(pos, window);
 		}
 
+		@Override
 		public CursorWindow getWindow() {
 			return mCursor.getWindow();
 		}
 
+		@Override
 		public boolean onMove(int oldPosition, int newPosition) {
 			return mCursor.onMove(oldPosition, newPosition);
 		}

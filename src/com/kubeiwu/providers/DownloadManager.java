@@ -895,7 +895,7 @@ public class DownloadManager {
 			if (i > 0) {
 				whereClause.append("OR ");
 			}
-			whereClause.append(Downloads._ID);
+			whereClause.append(BaseColumns._ID);
 			whereClause.append(" = ? ");
 		}
 		whereClause.append(")");
@@ -1074,7 +1074,7 @@ public class DownloadManager {
 			}
 
 			if (column.equals(COLUMN_ID)) {
-				return getUnderlyingLong(Downloads._ID);// 获取id
+				return getUnderlyingLong(BaseColumns._ID);// 获取id
 			}
 			if (column.equals(COLUMN_TOTAL_SIZE_BYTES)) {
 				return getUnderlyingLong(Downloads.COLUMN_TOTAL_BYTES);// 总大小
