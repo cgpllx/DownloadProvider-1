@@ -535,7 +535,7 @@ public class DownloadList extends Activity implements OnChildClickListener, OnIt
 		mSelectionDeleteButton.setText(deleteButtonStringId);
 	}
 
-	@Override
+	@Override  
 	public void onClick(View v) {
 
 		int id = v.getId();
